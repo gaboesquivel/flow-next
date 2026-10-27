@@ -30,7 +30,7 @@ if (code.length > 0) {
 }
 
 if (other.length > 0) {
-  const fmt = spawnSync("pnpm", ["exec", "oxfmt", "--check", ...other], {
+  const fmt = spawnSync("pnpm", ["exec", "oxfmt", "--check", "--no-error-on-unmatched-pattern", ...other], {
     cwd: repoRoot,
     stdio: "inherit",
   });
