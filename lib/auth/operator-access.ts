@@ -2,7 +2,9 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const OPERATOR_SESSION_COOKIE = "flow_operator_session";
 
-export const getOperatorAccessToken = () => process.env.OPERATOR_ACCESS_TOKEN?.trim() ?? "";
+/** Canonical: `OPERATOR_SECRET`. `OPERATOR_ACCESS_TOKEN` is accepted for older env files. */
+export const getOperatorAccessToken = () =>
+  process.env.OPERATOR_SECRET?.trim() ?? process.env.OPERATOR_ACCESS_TOKEN?.trim() ?? "";
 
 export const isOperatorAccessConfigured = () => getOperatorAccessToken().length >= 16;
 
@@ -61,7 +63,7 @@ export const operatorAccessDeniedResponse = ({
       {
         code: "operator_disabled",
         message: "Operator access is not configured.",
-        resolution: "Set OPERATOR_ACCESS_TOKEN (min 16 characters) in the deployment environment.",
+        resolution: "Set OPERATOR_SECRET (min 16 characters) in the deployment environment.",
       },
       { status: 503 },
     );
@@ -70,8 +72,7 @@ export const operatorAccessDeniedResponse = ({
     {
       code: "operator_unauthorized",
       message: "Operator credentials are invalid or missing.",
-      resolution:
-        "Send Authorization: Bearer <OPERATOR_ACCESS_TOKEN> or establish an operator session.",
+      resolution: "Send Authorization: Bearer <OPERATOR_SECRET> or establish an operator session.",
     },
     { status: 401 },
   );

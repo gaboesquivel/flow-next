@@ -38,8 +38,9 @@ test("public MCP tools/list excludes operator-only tools", async () => {
   for (const operatorTool of operatorMcpToolNames) assert.equal(names.has(operatorTool), false);
 });
 
-test("operator MCP fails closed when OPERATOR_ACCESS_TOKEN unset", async () => {
-  const previous = process.env.OPERATOR_ACCESS_TOKEN;
+test("operator MCP fails closed when OPERATOR_SECRET unset", async () => {
+  const previous = process.env.OPERATOR_SECRET;
+  delete process.env.OPERATOR_SECRET;
   delete process.env.OPERATOR_ACCESS_TOKEN;
   try {
     const response = await mcpPost(postOperatorMcp, {
@@ -54,13 +55,14 @@ test("operator MCP fails closed when OPERATOR_ACCESS_TOKEN unset", async () => {
     });
     assert.equal(response.status, 503);
   } finally {
-    if (previous !== undefined) process.env.OPERATOR_ACCESS_TOKEN = previous;
+    if (previous !== undefined) process.env.OPERATOR_SECRET = previous;
   }
 });
 
 test("operator MCP rejects missing bearer token when configured", async () => {
-  const previous = process.env.OPERATOR_ACCESS_TOKEN;
-  process.env.OPERATOR_ACCESS_TOKEN = "test-operator-token-16chars";
+  const previous = process.env.OPERATOR_SECRET;
+  process.env.OPERATOR_SECRET = "test-operator-token-16chars";
+  delete process.env.OPERATOR_ACCESS_TOKEN;
   try {
     const response = await mcpPost(postOperatorMcp, {
       id: 1,
@@ -74,7 +76,7 @@ test("operator MCP rejects missing bearer token when configured", async () => {
     });
     assert.equal(response.status, 401);
   } finally {
-    if (previous === undefined) delete process.env.OPERATOR_ACCESS_TOKEN;
-    else process.env.OPERATOR_ACCESS_TOKEN = previous;
+    if (previous === undefined) delete process.env.OPERATOR_SECRET;
+    else process.env.OPERATOR_SECRET = previous;
   }
 });

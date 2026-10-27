@@ -3,8 +3,9 @@ import test from "node:test";
 
 import { POST as postSession } from "../../app/api/operator/session/route";
 
-test("operator session POST fails closed without OPERATOR_ACCESS_TOKEN", async () => {
-  const previous = process.env.OPERATOR_ACCESS_TOKEN;
+test("operator session POST fails closed without OPERATOR_SECRET", async () => {
+  const previous = process.env.OPERATOR_SECRET;
+  delete process.env.OPERATOR_SECRET;
   delete process.env.OPERATOR_ACCESS_TOKEN;
   try {
     const response = await postSession(
@@ -16,6 +17,6 @@ test("operator session POST fails closed without OPERATOR_ACCESS_TOKEN", async (
     );
     assert.equal(response.status, 503);
   } finally {
-    if (previous !== undefined) process.env.OPERATOR_ACCESS_TOKEN = previous;
+    if (previous !== undefined) process.env.OPERATOR_SECRET = previous;
   }
 });

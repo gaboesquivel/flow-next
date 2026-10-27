@@ -4,50 +4,64 @@ import { z } from "zod";
 
 import { getOperatorAccessToken, isOperatorAccessConfigured } from "@/lib/auth/operator-access";
 
+import { starterMcpToolCatalog } from "./tool-catalog";
 import { asToolResult } from "./tool-result";
 
-export const operatorMcpToolNames = ["get_diagnostics", "get_config_status"] as const;
+const plainToolMeta = { _meta: {} };
+
+export const operatorMcpToolNames = [
+  "operator_health",
+  "config_status",
+  "public_tool_catalog",
+] as const;
 
 export const registerOperatorMcpTools = (server: McpServer) => {
   registerAppTool(
     server,
-    "get_diagnostics",
+    "operator_health",
     {
-      _meta: {},
-      description: "Protected diagnostics for the Operator surface (runtime and deployment hints).",
-      inputSchema: { detail: z.boolean().optional() },
+      ...plainToolMeta,
+      description: "Protected liveness check for the Operator MCP server (owner only).",
+      inputSchema: { ping: z.boolean().optional() },
     },
     () =>
       asToolResult({
-        nodeVersion: process.version,
-        operatorConfigured: isOperatorAccessConfigured(),
-        platform: process.platform,
-        timestamp: new Date().toISOString(),
+        ok: true,
+        role: "operator",
+        service: "flow-next-operator-mcp",
       }),
   );
 
   registerAppTool(
     server,
-    "get_config_status",
+    "config_status",
     {
-      _meta: {},
-      description: "Protected configuration status (feature flags only — never secrets).",
-      inputSchema: {},
+      ...plainToolMeta,
+      description: "Report non-secret configuration status for diagnostics (owner only).",
+      inputSchema: { verbose: z.boolean().optional() },
+    },
+    ({ verbose }) =>
+      asToolResult({
+        aiGateway: Boolean(process.env.AI_GATEWAY_API_KEY?.trim()),
+        anthropicChat: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+        eveModel: process.env.EVE_AGENT_MODEL?.trim() ?? "anthropic/claude-sonnet-4-20250514",
+        operatorConfigured: isOperatorAccessConfigured(),
+        operatorTokenLength: getOperatorAccessToken().length,
+        verbose: verbose ?? false,
+      }),
+  );
+
+  registerAppTool(
+    server,
+    "public_tool_catalog",
+    {
+      ...plainToolMeta,
+      description: "List public Assistant MCP tools (diagnostic; does not expose operator tools).",
+      inputSchema: { detail: z.boolean().optional() },
     },
     () =>
       asToolResult({
-        chat: {
-          anthropicDirect: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
-          gateway: Boolean(process.env.AI_GATEWAY_API_KEY?.trim()),
-        },
-        genui: {
-          gateway: Boolean(process.env.AI_GATEWAY_API_KEY?.trim()),
-          typesafeRouting: Boolean(process.env.TYPESAFE_API_KEY?.trim()),
-        },
-        operator: {
-          accessConfigured: isOperatorAccessConfigured(),
-          tokenLength: getOperatorAccessToken().length,
-        },
+        publicTools: starterMcpToolCatalog.map((tool) => tool.name),
       }),
   );
 };
