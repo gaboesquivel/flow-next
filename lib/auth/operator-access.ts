@@ -9,7 +9,7 @@ export const getOperatorAccessToken = () =>
 export const isOperatorAccessConfigured = () => getOperatorAccessToken().length >= 16;
 
 export const signOperatorSession = ({ token }: { token: string }) =>
-  createHmac("sha256", token).update("flow-next-operator-v1").digest("hex");
+  createHmac("sha256", token).update("flow-template-operator-v1").digest("hex");
 
 export const readOperatorSessionCookie = (request: Request) => {
   const cookieHeader = request.headers.get("cookie") ?? "";
@@ -32,8 +32,11 @@ export const verifyOperatorRequest = (request: Request) => {
 
   const configured = getOperatorAccessToken();
   const bearer = readBearerToken(request);
-  if (bearer) {
-    if (!safeEqual(bearer, configured))
+  const headerSecret = request.headers.get("x-operator-secret")?.trim();
+  const token = bearer ?? headerSecret ?? "";
+
+  if (token) {
+    if (!safeEqual(token, configured))
       return { ok: false as const, reason: "unauthorized" as const };
     return { ok: true as const };
   }

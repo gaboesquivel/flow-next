@@ -19,4 +19,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm qa
+      - run: pnpm eval:genui:offline
       - run: pnpm build

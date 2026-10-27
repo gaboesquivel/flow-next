@@ -41,13 +41,12 @@ Public discovery (OpenAPI, `.well-known`, server card) must list **public** tool
 
 ## Template differences
 
-| Capability                         | flow-next          | flow-mono            |
-| ---------------------------------- | ------------------ | -------------------- |
-| Operator web console (`/operator`) | Yes                | Not yet              |
-| Layout                             | Single Next.js app | Turborepo `apps/web` |
+| Capability | flow-next          | flow-mono            |
+| ---------- | ------------------ | -------------------- |
+| Layout     | Single Next.js app | Turborepo `apps/web` |
 
 ## Demo behavior
 
 - GenUI compose uses synthetic fixtures (no database).
 - Assistant home demonstrates compose + public MCP catalog.
-- Operator diagnostics via MCP on both; flow-next also exposes protected HTTP chat behind the same secret.
+- Operator web chat and MCP diagnostics use the same `OPERATOR_SECRET` on both templates.
