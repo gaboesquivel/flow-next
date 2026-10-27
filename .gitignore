@@ -13,6 +13,7 @@ out
 
 # build artifacts
 mcp-app/dist
+*.tsbuildinfo
 
 # eve
 .eve
