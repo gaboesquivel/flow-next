@@ -1,10 +1,11 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGateway } from "@ai-sdk/gateway";
+import type { LanguageModel } from "ai";
 
 const defaultChatModel = () =>
   process.env.CHAT_MODEL?.trim() ?? "anthropic/claude-sonnet-4-20250514";
 
-export const resolveChatModel = () => {
+export const resolveChatModel = (): LanguageModel | null => {
   const gatewayKey = process.env.AI_GATEWAY_API_KEY?.trim();
   if (gatewayKey) return createGateway({ apiKey: gatewayKey })(defaultChatModel());
 
