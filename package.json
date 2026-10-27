@@ -23,7 +23,6 @@
     "eval:offline": "node --import tsx lib/genui/scripts/eval-offline.ts",
     "eval:genui:offline": "pnpm eval:offline",
     "agentic:check": "sh -c 'if [ -z \"${AGENTIC_CHECK_URL:-}\" ]; then echo \"agentic:check requires AGENTIC_CHECK_URL (public host without scheme)\"; exit 1; fi; case \"$AGENTIC_CHECK_URL\" in http://*|https://*) echo \"agentic:check: omit https:// from AGENTIC_CHECK_URL\"; exit 1;; esac; exec is-agentic \"$AGENTIC_CHECK_URL\"'",
-    "test:browser": "playwright test",
     "security:repo": "node tooling/security/check-repository.mjs",
     "security:check": "node --test tooling/security/block-secret-files.test.mjs && node tooling/security/check-repository.mjs && pnpm audit --prod --audit-level=high",
     "hooks:pre-commit": "node tooling/security/block-secret-files.mjs && node tooling/checks/check-staged.mjs",
@@ -62,7 +61,6 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@playwright/test": "~1.64.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.5",

@@ -5,7 +5,13 @@ import react from "ultracite/oxlint/react";
 
 export default defineConfig({
   extends: [core, react, next],
-  ignorePatterns: [...(core.ignorePatterns ?? []), ".eve/**", "components/**", "mcp-app/dist/**"],
+  ignorePatterns: [
+    ...(core.ignorePatterns ?? []),
+    ".agents/**",
+    ".eve/**",
+    "components/**",
+    "mcp-app/dist/**",
+  ],
   overrides: [
     {
       files: ["providers/query-provider.tsx"],

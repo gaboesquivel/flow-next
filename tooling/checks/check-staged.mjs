@@ -14,12 +14,9 @@ const paths = staged.stdout.toString("utf-8").split("\0").filter(Boolean);
 const codePattern = /\.(?:[cm]?[jt]sx?)$/u;
 
 const isVendoredAgentSkill = (file) =>
-  file.startsWith(".agents/.agents/skills/") ||
-  file.startsWith(".agents/skills/");
+  file.startsWith(".agents/.agents/skills/") || file.startsWith(".agents/skills/");
 
-const code = paths.filter(
-  (file) => codePattern.test(file) && !isVendoredAgentSkill(file),
-);
+const code = paths.filter((file) => codePattern.test(file) && !isVendoredAgentSkill(file));
 const other = paths.filter(
   (file) => !codePattern.test(file) && /\.(?:css|json|ya?ml)$/u.test(file),
 );

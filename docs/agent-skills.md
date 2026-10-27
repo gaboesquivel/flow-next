@@ -6,10 +6,10 @@ This is **not** the [Flow Skills](https://github.com/gaboesquivel/flow-skills) m
 
 ## Layout
 
-| Path | Purpose |
-| --- | --- |
-| `.agents/skills-lock.json` | Pinned upstream skills and hashes |
-| `.agents/skills/<name>/` | Symlinks for agents (after install) |
+| Path                             | Purpose                                          |
+| -------------------------------- | ------------------------------------------------ |
+| `.agents/skills-lock.json`       | Pinned upstream skills and hashes                |
+| `.agents/skills/<name>/`         | Symlinks for agents (after install)              |
 | `.agents/.agents/skills/<name>/` | Vendored skill trees (committed in the template) |
 
 ## Commands
