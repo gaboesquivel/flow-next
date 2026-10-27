@@ -24,8 +24,11 @@ try {
 if (!existsSync(path.join(root, "node_modules")))
   execSync("pnpm install", { cwd: root, stdio: "inherit" });
 
+const skipSkills =
+  process.env.FLOW_SETUP_SKIP_SKILLS === "1" || process.env.FLOW_SETUP_SKIP_SKILLS === "true";
+
 const agentsDir = path.join(root, ".agents");
-if (existsSync(path.join(agentsDir, "skills-lock.json"))) {
+if (!skipSkills && existsSync(path.join(agentsDir, "skills-lock.json"))) {
   if (!existsSync(path.join(agentsDir, "node_modules")))
     execSync("pnpm install", { cwd: agentsDir, stdio: "inherit" });
   execSync("pnpm skills:install", { cwd: agentsDir, stdio: "inherit" });

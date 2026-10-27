@@ -1,6 +1,6 @@
-import { createAnthropic } from "@ai-sdk/anthropic";
 import { streamText } from "ai";
 
+import { chatUnavailableResolution, resolveChatModel } from "@/lib/ai/resolve-chat-model";
 import { operatorAccessDeniedResponse, verifyOperatorRequest } from "@/lib/auth/operator-access";
 import { jsonError } from "@/lib/api/json-error";
 
@@ -11,19 +11,16 @@ You must not expose secret values (API keys, tokens). When Operator access is mi
 
 Keep answers concise and actionable.`;
 
-const anthropic = createAnthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 export const POST = async (request: Request) => {
   const access = verifyOperatorRequest(request);
   if (!access.ok) return operatorAccessDeniedResponse({ reason: access.reason });
 
-  if (!process.env.ANTHROPIC_API_KEY?.trim())
+  const model = resolveChatModel();
+  if (!model)
     return jsonError({
       code: "chat_unavailable",
-      message: "ANTHROPIC_API_KEY is not configured.",
-      resolution: "Configure ANTHROPIC_API_KEY or use MCP operator tools.",
+      message: "Chat model credentials are not configured.",
+      resolution: chatUnavailableResolution(),
       status: 503,
     });
 
@@ -52,7 +49,7 @@ export const POST = async (request: Request) => {
 
   const result = streamText({
     messages,
-    model: anthropic(process.env.CHAT_MODEL?.trim() ?? "claude-sonnet-4-20250514"),
+    model,
     system: systemPrompt,
   });
 

@@ -1,6 +1,6 @@
-import { createAnthropic } from "@ai-sdk/anthropic";
 import { streamText } from "ai";
 
+import { chatUnavailableResolution, resolveChatModel } from "@/lib/ai/resolve-chat-model";
 import { jsonError, withExtraHeaders } from "@/lib/api/json-error";
 import { discoveryRateLimitHeaders } from "@/lib/api/rate-limit-headers";
 
@@ -10,10 +10,6 @@ You can explain GenUI, MCP compose_ui, and Eve tools. You do not mutate remote s
 When users want a new screen, suggest they use the studio prompt or compose_ui with a clear UI description.
 
 Keep answers concise. Use bullets for next steps when helpful.`;
-
-const anthropic = createAnthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 export const GET = () =>
   withExtraHeaders(
@@ -27,11 +23,12 @@ export const GET = () =>
   );
 
 export async function POST(req: Request) {
-  if (!process.env.ANTHROPIC_API_KEY?.trim())
+  const model = resolveChatModel();
+  if (!model)
     return jsonError({
       code: "chat_unavailable",
-      message: "ANTHROPIC_API_KEY is not configured.",
-      resolution: "Configure ANTHROPIC_API_KEY on the deployment or use MCP tools instead.",
+      message: "Chat model credentials are not configured.",
+      resolution: chatUnavailableResolution(),
       status: 503,
     });
 
@@ -60,7 +57,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     messages,
-    model: anthropic(process.env.CHAT_MODEL?.trim() ?? "claude-sonnet-4-20250514"),
+    model,
     system: systemPrompt,
   });
 
