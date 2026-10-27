@@ -113,7 +113,7 @@
       "source": "vercel/vercel",
       "sourceType": "github",
       "skillPath": "skills/vercel-cli/SKILL.md",
-      "computedHash": "bc312e5c407c79c264503ef588613ee697508636b8e6ba76ee2585979b49ba2b"
+      "computedHash": "1b8ad00e44fc817a8baabac6524b83cb329b25e01828d4c9ebc5bf1baad68bf3"
     },
     "vercel-composition-patterns": {
       "source": "vercel-labs/agent-skills",
