@@ -28,6 +28,8 @@ Open the Portless URL (default host `flow-next.localhost`). Configure `.env.loca
 
 Cross-template contract: [docs/INTEROP.md](./docs/INTEROP.md).
 
+Agent skills for this stack: [docs/agent-skills.md](./docs/agent-skills.md).
+
 ## Deploy
 
 Vercel-first; `vercel.json` runs `pnpm build`. Set gateway and operator secrets in the project environment.

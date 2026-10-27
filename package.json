@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "setup": "node tooling/setup/setup.mjs",
+    "skills:install": "pnpm --dir .agents skills:install",
+    "skills:update": "pnpm --dir .agents skills:update",
     "setup:portless": "portless trust && portless proxy start",
     "dev": "portless",
     "dev:app": "next dev",

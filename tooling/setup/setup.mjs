@@ -24,4 +24,11 @@ try {
 if (!existsSync(path.join(root, "node_modules")))
   execSync("pnpm install", { cwd: root, stdio: "inherit" });
 
+const agentsDir = path.join(root, ".agents");
+if (existsSync(path.join(agentsDir, "skills-lock.json"))) {
+  if (!existsSync(path.join(agentsDir, "node_modules")))
+    execSync("pnpm install", { cwd: agentsDir, stdio: "inherit" });
+  execSync("pnpm skills:install", { cwd: agentsDir, stdio: "inherit" });
+}
+
 console.log("setup complete — review .env.local before running pnpm dev");

@@ -18,6 +18,9 @@ mcp-app/dist
 # eve
 .eve
 
+# agent skills tooling
+.agents/node_modules
+
 # misc
 .DS_Store
 *.pem
