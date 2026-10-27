@@ -32,7 +32,7 @@
     "@ai-sdk/anthropic": "^3.0.58",
     "@ai-sdk/gateway": "4.0.125",
     "@base-ui/react": "^1.9.0",
-    "@faker-js/faker": "9.9.0",
+    "@faker-js/faker": "10.5.0",
     "@modelcontextprotocol/ext-apps": "^2.0.3",
     "@modelcontextprotocol/server": "^2.4.0",
     "@openuidev/lang-core": "1.0.1",
