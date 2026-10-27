@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 
 import type { ToolContext } from "eve/tools";
 
-import composeUi from "../../agent/tools/compose-ui";
+import composeUi from "../../lib/agent-tools/compose-ui";
 
 test("compose-ui execute returns support dashboard envelope", async () => {
   const result = await composeUi.execute(

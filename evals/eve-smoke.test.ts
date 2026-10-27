@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 
 import type { ToolContext } from "eve/tools";
 
-import composeUiTool from "../agent/tools/compose-ui";
-import listCatalogTool from "../agent/tools/list-component-catalog";
+import composeUiTool from "../lib/agent-tools/compose-ui";
+import listCatalogTool from "../lib/agent-tools/list-component-catalog";
 
 const ctx = {} as ToolContext;
 

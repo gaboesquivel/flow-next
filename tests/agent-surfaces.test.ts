@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 
 import { GET as getApiCatchAll } from "../app/api/[...path]/route";
 import { GET as getChat } from "../app/api/chat/route";

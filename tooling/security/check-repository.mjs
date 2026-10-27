@@ -17,7 +17,5 @@ if (blocked.length === 0) exit(0);
 
 console.error("\nSecurity check failed: tracked sensitive paths must not be committed\n");
 for (const file of blocked) console.error(`  - ${file}`);
-console.error(
-  "\nUse .env.example, .env.<qualifier>.example, or .env.schema templates instead.\n",
-);
+console.error("\nUse .env.example, .env.<qualifier>.example, or .env.schema templates instead.\n");
 exit(1);
