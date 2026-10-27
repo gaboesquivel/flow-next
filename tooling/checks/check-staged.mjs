@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+
+import { spawnSync } from "node:child_process";
+
+import { repoRoot } from "../lib/repo-paths.mjs";
+
+const staged = spawnSync("git", ["diff", "--cached", "--name-only", "-z"], {
+  cwd: repoRoot,
+  encoding: "buffer",
+});
+
+const paths = staged.stdout.toString("utf-8").split("\0").filter(Boolean);
+
+const codePattern = /\.(?:[cm]?[jt]sx?)$/u;
+
+const code = paths.filter((file) => codePattern.test(file));
+const other = paths.filter(
+  (file) => !codePattern.test(file) && /\.(?:css|json|ya?ml)$/u.test(file),
+);
+
+if (code.length > 0) {
+  const lint = spawnSync("pnpm", ["exec", "oxlint", ...code], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+  if (lint.status !== 0) process.exit(lint.status ?? 1);
+}
+
+if (other.length > 0) {
+  const fmt = spawnSync("pnpm", ["exec", "oxfmt", "--check", ...other], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+  if (fmt.status !== 0) process.exit(fmt.status ?? 1);
+}

@@ -1,0 +1,78 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+export const OPERATOR_SESSION_COOKIE = "flow_operator_session";
+
+export const getOperatorAccessToken = () => process.env.OPERATOR_ACCESS_TOKEN?.trim() ?? "";
+
+export const isOperatorAccessConfigured = () => getOperatorAccessToken().length >= 16;
+
+export const signOperatorSession = ({ token }: { token: string }) =>
+  createHmac("sha256", token).update("flow-next-operator-v1").digest("hex");
+
+export const readOperatorSessionCookie = (request: Request) => {
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const match = cookieHeader.match(
+    new RegExp(`(?:^|;\\s*)${OPERATOR_SESSION_COOKIE}=([^;]+)`, "u"),
+  );
+  return match?.[1] ? decodeURIComponent(match[1]) : undefined;
+};
+
+const readBearerToken = (request: Request) => {
+  const authorization = request.headers.get("authorization") ?? "";
+  if (!authorization.toLowerCase().startsWith("bearer ")) return;
+  const token = authorization.slice(7).trim();
+  if (token.length === 0) return;
+  return token;
+};
+
+export const verifyOperatorRequest = (request: Request) => {
+  if (!isOperatorAccessConfigured()) return { ok: false as const, reason: "disabled" as const };
+
+  const configured = getOperatorAccessToken();
+  const bearer = readBearerToken(request);
+  if (bearer) {
+    if (!safeEqual(bearer, configured))
+      return { ok: false as const, reason: "unauthorized" as const };
+    return { ok: true as const };
+  }
+
+  const session = readOperatorSessionCookie(request);
+  const expected = signOperatorSession({ token: configured });
+  if (!session || !safeEqual(session, expected))
+    return { ok: false as const, reason: "unauthorized" as const };
+
+  return { ok: true as const };
+};
+
+const safeEqual = (left: string, right: string) => {
+  const a = Buffer.from(left);
+  const b = Buffer.from(right);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+};
+
+export const operatorAccessDeniedResponse = ({
+  reason,
+}: {
+  reason: "disabled" | "unauthorized";
+}) => {
+  if (reason === "disabled")
+    return Response.json(
+      {
+        code: "operator_disabled",
+        message: "Operator access is not configured.",
+        resolution: "Set OPERATOR_ACCESS_TOKEN (min 16 characters) in the deployment environment.",
+      },
+      { status: 503 },
+    );
+
+  return Response.json(
+    {
+      code: "operator_unauthorized",
+      message: "Operator credentials are invalid or missing.",
+      resolution:
+        "Send Authorization: Bearer <OPERATOR_ACCESS_TOKEN> or establish an operator session.",
+    },
+    { status: 401 },
+  );
+};
