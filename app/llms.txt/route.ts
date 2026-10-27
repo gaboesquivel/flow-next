@@ -12,7 +12,8 @@ Use when you need a web UI that generates declarative compositions from natural 
 
 ## Human routes
 
-- ${origin}/ (studio — prompt + chat sidebar + preview)
+- ${origin}/ (home)
+- ${origin}/genui (GenUI playground — prompt + chat sidebar + preview)
 - ${origin}/dev (MCP and API links)
 
 ## Agent interoperability

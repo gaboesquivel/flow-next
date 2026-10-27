@@ -23,7 +23,7 @@ Open the Portless URL (default host `flow-next.localhost`). Configure `.env.loca
 
 ## Surfaces
 
-- **Assistant** — `/`, `/api/chat`, `/api/mcp`, `/mcp`
+- **Assistant** — `/`, `/genui`, `/api/chat`, `/api/mcp`, `/mcp`
 - **Operator** — `/operator`, `/api/operator/chat`, `/api/mcp/operator` (requires `OPERATOR_SECRET`)
 
 Cross-template contract: [docs/INTEROP.md](./docs/INTEROP.md).

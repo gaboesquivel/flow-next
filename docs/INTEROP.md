@@ -48,5 +48,5 @@ Public discovery (OpenAPI, `.well-known`, server card) must list **public** tool
 ## Demo behavior
 
 - GenUI compose uses synthetic fixtures (no database).
-- Assistant home demonstrates compose + public MCP catalog.
+- The public GenUI playground is at `/genui` and demonstrates compose + the public MCP catalog.
 - Operator web chat and MCP diagnostics use the same `OPERATOR_SECRET` on both templates.

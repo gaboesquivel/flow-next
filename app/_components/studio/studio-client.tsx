@@ -202,6 +202,9 @@ export const StudioClient = () => {
                 New composition
               </Button>
             ) : null}
+            <Link className="text-primary text-sm underline-offset-4 hover:underline" href="/">
+              Home
+            </Link>
             <Link className="text-primary text-sm underline-offset-4 hover:underline" href="/dev">
               MCP &amp; API
             </Link>

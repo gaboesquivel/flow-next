@@ -22,8 +22,8 @@ export default async function DevPage() {
       </header>
       <ul className="space-y-3 text-sm">
         <li>
-          <Link className="text-primary underline" href="/">
-            Web studio
+          <Link className="text-primary underline" href="/genui">
+            GenUI playground
           </Link>
         </li>
         <li>

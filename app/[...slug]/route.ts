@@ -9,6 +9,7 @@ const knownPath = (pathname: string) => {
   if (pathname === "/" || pathname === "/favicon.ico") return true;
   const prefixes = [
     "/dev",
+    "/genui",
     "/developers",
     "/operator",
     "/api",
