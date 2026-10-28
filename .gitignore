@@ -27,3 +27,4 @@ mcp-app/dist
 .vercel
 test-results
 playwright-report
+AGENTS.md
