@@ -8,7 +8,6 @@ export default defineConfig({
   ignorePatterns: [
     ...(core.ignorePatterns ?? []),
     ".agents/**",
-    ".claude/**",
     ".eve/**",
     "components/**",
     "mcp-app/dist/**",

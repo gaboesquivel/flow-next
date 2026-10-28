@@ -9,7 +9,7 @@ This is **not** the [Flow Skills](https://github.com/gaboesquivel/flow-skills) m
 | Path                             | Purpose                                          |
 | -------------------------------- | ------------------------------------------------ |
 | `.agents/skills-lock.json`       | Pinned upstream skills and hashes                |
-| `.agents/skills/<name>/`         | Committed symlinks to `../.agents/skills/<name>` |
+| `.agents/skills/<name>/`         | Symlinks for agents (after install)              |
 | `.agents/.agents/skills/<name>/` | Vendored skill trees (committed in the template) |
 
 ## Commands
@@ -21,9 +21,7 @@ pnpm skills:update    # bump lock from upstream (maintainers)
 
 Set `FLOW_SETUP_SKIP_SKILLS=1` to skip skill install during `pnpm setup`.
 
-Invoke skills explicitly in your agent host (for example open `.agents/skills/eve/SKILL.md`).
-
-On Windows, clone with `core.symlinks=true` so the `.agents/skills` links check out as symlinks.
+After install, invoke skills explicitly in your agent host (for example open `.agents/skills/eve/SKILL.md`).
 
 ## Curated skills (23)
 
