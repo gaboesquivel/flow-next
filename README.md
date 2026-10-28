@@ -30,7 +30,7 @@ Cross-template contract: [docs/INTEROP.md](./docs/INTEROP.md).
 
 Agent skills for this stack: [docs/agent-skills.md](./docs/agent-skills.md).
 
-`AGENTS.md` is committed. `next dev` maintains the Next.js block between its `nextjs-agent-rules` markers and keeps everything else; add project instructions outside those markers. `CLAUDE.md` imports it.
+`AGENTS.md` is committed. When `next dev` detects an AI coding agent, it writes the Next.js block between its `nextjs-agent-rules` markers and keeps everything else; add project instructions outside those markers. Set `agentRules: false` in `next.config.ts` to have `next dev` remove the block. `CLAUDE.md` imports `AGENTS.md`.
 
 ## Deploy
 

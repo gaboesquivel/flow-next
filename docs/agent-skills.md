@@ -21,7 +21,9 @@ pnpm skills:update    # bump lock from upstream (maintainers)
 
 Set `FLOW_SETUP_SKIP_SKILLS=1` to skip skill install during `pnpm setup`.
 
-After install, invoke skills explicitly in your agent host (for example open `.agents/skills/eve/SKILL.md`).
+Invoke skills explicitly in your agent host (for example open `.agents/skills/eve/SKILL.md`).
+
+On Windows, clone with `core.symlinks=true` so the `.agents/skills` links check out as symlinks.
 
 ## Curated skills (23)
 
