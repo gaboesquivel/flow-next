@@ -9,7 +9,7 @@ This is **not** the [Flow Skills](https://github.com/gaboesquivel/flow-skills) m
 | Path                             | Purpose                                          |
 | -------------------------------- | ------------------------------------------------ |
 | `.agents/skills-lock.json`       | Pinned upstream skills and hashes                |
-| `.agents/skills/<name>/`         | Symlinks for agents (after install)              |
+| `.agents/skills/<name>/`         | Committed symlinks to `../.agents/skills/<name>` |
 | `.agents/.agents/skills/<name>/` | Vendored skill trees (committed in the template) |
 
 ## Commands
