@@ -30,6 +30,8 @@ Cross-template contract: [docs/INTEROP.md](./docs/INTEROP.md).
 
 Agent skills for this stack: [docs/agent-skills.md](./docs/agent-skills.md).
 
+`AGENTS.md` is committed. `next dev` maintains the Next.js block between its `nextjs-agent-rules` markers and keeps everything else; add project instructions outside those markers. `CLAUDE.md` imports it.
+
 ## Deploy
 
 Vercel-first; `vercel.json` runs `pnpm build`. Set gateway and operator secrets in the project environment.
