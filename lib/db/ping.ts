@@ -12,7 +12,7 @@ export const pingDatabase = async ({
   query = defaultQuery,
 }: {
   databaseUrl?: string;
-  query?: (databaseUrl: string) => Promise<unknown>;
+  query?: (databaseUrl: string) => Promise<unknown> | unknown;
 }) => {
   if (!databaseUrl?.trim()) return { ok: false as const, status: 503 as const };
   await query(databaseUrl);
