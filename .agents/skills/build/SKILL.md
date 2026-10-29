@@ -1,6 +1,6 @@
 ---
 name: build
-description: Implement an authorized change from a request, specification, or task, keeping root context aligned. Use when the user says "build it", "implement this", or "make the change".
+description: Implement an authorized change on a branch, then review, fix, check, and confirm the branch is live, without merging. Use when the user says "build it".
 disable-model-invocation: false
 ---
 
@@ -8,18 +8,18 @@ disable-model-invocation: false
 
 ## Outcome
 
-**"Build it"** ends with a ready branch for `ship` to land:
+**"Build it"** is the approval: no confirmation after it. It ends with a verified branch for `ship` to land:
 
-- **GitHub mode:** an open pull request. Its body links the spec file when there is one and records the size guard's result; add `Closes #N` only for an issue the user named.
+- **GitHub mode:** an open pull request. Its body links the spec file when there is one, records the size guard's result and the reviewed head, and lists any `unresolved` acceptance scenario steps; add `Closes #N` only for an issue the user named.
 - **Local mode:** a committed branch.
 
-Build does not wait on CI and does not merge. Run what the work needs while implementing; the full checks run once, in `ship`.
+Build never merges. Run what the work needs while implementing; the full checks run once, on the final head (see Verify).
 
-**Proof.** The pull request is open or the branch is committed; small work has a self-check (see Size guard); the report lists work in flight (see Work in flight).
+**Proof.** The pull request is open or the branch is committed; the review the size guard picked ran on the final head with no blocking findings left; checks are green on that head; branch liveness is reported; the report lists work in flight (see Work in flight).
 
 Read the request, repository instructions, and code. Preserve unrelated working-tree changes. Do not add scope just because it is nearby. When intent is unclear for a new product or substantial feature, suggest `explore` and wait; never start exploration unasked. When behavior or accepted context changes, update owning documentation; do not replace a project's product identity with Flow's methodology identity. Link to specs or decisions instead of duplicating rationale; do not open new spec or decision files unless the user asked or the work already uses that convention.
 
-"Build it" on a draft spec accepts it in the build's first commit, as `to-spec`'s accept step describes. A draft that cannot be accepted stops the build: say what is missing.
+"Build it" on a draft spec accepts it in the build's first commit (`to-spec`'s Status and acceptance).
 
 ## Deliver
 
@@ -27,7 +27,15 @@ Asking to build authorizes these steps with no confirmation. It does not authori
 
 Outside a Git repository, offer `git init` and stop on a no.
 
-Work on a branch that is not the default branch. Commit only this work: no credentials, local logs, or generated secrets, and never rewrite unrelated commits. Run the self-check when the work is small. In GitHub mode, push and open a ready pull request, or update the open one. Report the branch or pull request, what was checked, limitations, and work in flight.
+Work on a branch that is not the default branch. Commit only this work: no credentials, local logs, or generated secrets, and never rewrite unrelated commits. In GitHub mode, push and open a ready pull request, or update the open one. Then Verify. Report the branch or pull request, the review and its verdicts, checks, liveness, limitations, and work in flight.
+
+### Verify
+
+1. **Review.** Run the review the size guard picked on the head you will hand over. An `unmet` scenario step or a blocking finding is fixed on the branch, at most two fix rounds; re-review only what the fix touched. Try to resolve each `unresolved` step (run the test, read the preview); list the rest in the pull request body and the report. In GitHub mode, post the review on the pull request as a comment or COMMENT-type review, never an approval.
+2. **Checks.** Once, on the final head. **GitHub mode:** wait on CI; a pending check is pending, never passing. **Local mode:** run the suite on the branch: the documented check commands from the instruction file's command table, else package scripts for test, lint, typecheck, and build; when there is none, say so and never claim checks passed. On red, fix and check the new head, at most two fix rounds.
+3. **Liveness** of the branch's head, as `ship`'s Liveness describes.
+
+Stop on blocking findings or red checks after the fix rounds; report the branch as not ready.
 
 ### Unspecced work
 
@@ -35,17 +43,17 @@ Work with no spec or task is unspecced. Write a spec or tasks only when the user
 
 ### Size guard
 
-One home; `ship` points here. Judge once, at intake, before implementing; it never stops the work. Escalate for new product behavior, data shape or public API changes, migrations, or touches to authentication or permissions; secrets or credentials handling; dependencies or lockfiles; CI, workflow, or Git hook configuration; shell, exec, or filesystem-execution paths. When the size is uncertain, treat it as escalated.
+One home. Judge once, at intake, before implementing; it never stops the work. Escalate for new product behavior, data shape or public API changes, migrations, or touches to authentication or permissions; secrets or credentials handling; dependencies or lockfiles; CI, workflow, or Git hook configuration; shell, exec, or filesystem-execution paths. When the size is uncertain, treat it as escalated.
 
-- **Small:** build runs one single-agent self-check with fix rounds.
-- **Escalated, or the user asked ("review it"):** the independent review, run by `ship` in either mode.
+- **Small:** build runs one single-agent self-check on `review`'s axes, UI included when the diff changes what users see, with fix rounds.
+- **Escalated, or the user asked ("review it"):** the independent `review`, run in Verify.
 
 ## Delivery mode
 
-One home; other skills link here. Infer the mode; never ask. GitHub mode when `origin` is a GitHub repository; local mode otherwise. When `origin` is on GitHub but `gh` is unavailable, stop and say so; never fall back to local mode. A `Delivery:` line in the Flow block (`flow` owns it) or a mode named in the request overrides. A default branch that requires pull requests forces GitHub mode; when `gh` cannot reach it, stop and say so. Never record a mode the user did not give.
+One home; other skills link here. Infer the mode; never ask. GitHub mode when `origin` is a GitHub repository; local mode otherwise. When `origin` is on GitHub but `gh` is unavailable or unauthenticated, stop and say how to fix it (`gh auth login`); never fall back to local mode. A `Delivery:` line in the Flow block (`flow` owns it) or a mode named in the request overrides. A default branch that requires pull requests forces GitHub mode; when `gh` cannot reach it, stop and say so. Never record a mode the user did not give.
 
-- **GitHub mode:** one pull request per spec; `ship` waits on its checks and merges it.
-- **Local mode:** one branch per spec; `ship` checks the merge result and merges it into `main`.
+- **GitHub mode:** one pull request per spec; `build` waits on its checks and `ship` merges it.
+- **Local mode:** one branch per spec; `build` checks it and `ship` merges it into `main`.
 
 Either way, tasks stay a checklist in the spec.
 

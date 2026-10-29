@@ -23,8 +23,10 @@ On the yes, changing an Accepted decision gets a new decision record with status
 Match the request; never ask for a depth.
 
 - **Fix or small change:** no questions and no writes beyond the direction-change gate; hand back to the requested work.
-- **Feature:** clear intent, the journeys it adds or changes (one line each), and the agent lens (agent users and their journey, or "no agent users").
+- **Feature:** clear intent, the journeys it adds or changes (one line each), the agent lens (agent users and their journey, or "no agent users"), and the metric it should move, if any.
 - **New product:** the feature's items plus the riskiest assumption, a kill criterion, one main metric ("unknown, measure first" is acceptable) plus any supporting metrics the user names, alternatives including the status quo, and one pre-mortem (assume it failed six months from now; list the likeliest reasons).
+
+**Metrics.** Keep existing definitions. Tie each metric to the core journey outcome it observes, for human and agent users. Define a new or changed metric by what counts, population, calculation, window, likely source, baseline (or "unknown"), and target; a target without evidence is a hypothesis. Say whether collection exists or is proposed, and when the source is unknown, name the smallest step to find it. Early discovery may use qualitative evidence.
 
 Use `interview`'s question forms only until intent is clear, and skip its restatement and confirmation: the brief's confirmation covers intent. For a new product, or when the user asks, follow `grill` on the riskiest claims, with the pre-mortem folded in. Deeper discovery (`competitors`, `jtbd`) runs only when the user asks; when evidence warrants one, suggest it in one line. Missing supporting skills never block: apply the same steps directly.
 

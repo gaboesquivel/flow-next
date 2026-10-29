@@ -12,7 +12,7 @@ disable-model-invocation: false
 
 Read what exists; a missing source is a finding, not a reason to stop or ask.
 
-- **Intent:** `PRODUCT.md` (vision, problem, users, core journeys, main metric and kill criterion, riskiest assumptions, non-goals), `DESIGN.md` for journey steps, accepted specs and decisions under `docs/`, and any roadmap or `candidate` spec stubs. A record still Proposed or a draft spec is planned, not intended fact.
+- **Intent:** `PRODUCT.md` (vision, problem, users, core journeys, main metric and kill criterion, riskiest assumptions, non-goals), `DESIGN.md` for journey steps, accepted specs and decisions under `docs/`, and any roadmap or `candidate` spec stubs. Use measurement results already in the conversation or repository with their limitations; when a metric has no evidence, point to `measure` instead of measuring. A record still Proposed or a draft spec is planned, not intended fact.
 - **Reality:** the code, routes, commands, and tests (use `ARCHITECTURE.md` to find them) show what is implemented and what users can actually do. Git history shows where effort went recently.
 
 When both sides are large, read them as two parallel read-only workers (fan-out rule: `write-agents` Workers); otherwise read them directly. Code is the source of truth for what exists; documents are the source of truth for what was intended. Never count a capability as implemented on a document's word alone.
@@ -22,7 +22,7 @@ When both sides are large, read them as two parallel read-only workers (fan-out 
 Map each core user journey and stated problem to the capabilities that serve it, each marked **implemented**, **partial**, **planned**, or **none**. Then be critical:
 
 - **Working:** journeys and problems the implemented product actually serves.
-- **Missing:** stated problems with nothing implemented behind them, and success metrics nothing in the product can observe.
+- **Missing:** stated problems with nothing implemented behind them, and success metrics nothing in the product can observe. A shipped capability is not demonstrated value until evidence shows it.
 - **Drift:** built work no stated problem or journey asks for, or docs describing a product the code no longer is.
 - **Complexity:** features, settings, or surfaces that cost more than the problem they serve.
 

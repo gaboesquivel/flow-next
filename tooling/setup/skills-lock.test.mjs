@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
@@ -15,8 +16,15 @@ test("skills lock carries Flow and no overlapping workflow skills", () => {
   for (const name of overlapping) assert.equal(lock[name], undefined, name);
 });
 
-test("every locked skill is committed and readable", () => {
+// Checks Git, not the disk: an ignore rule (for example `build`) can drop a skill that still exists locally.
+const tracked = new Set(
+  execFileSync("git", ["ls-files", ".agents/skills", ".claude"], { cwd: root, encoding: "utf-8" })
+    .split("\n")
+    .filter(Boolean),
+);
+
+test("every locked skill is committed", () => {
   for (const name of Object.keys(lock))
-    assert.ok(existsSync(path.join(root, ".agents/skills", name, "SKILL.md")), name);
-  assert.ok(existsSync(path.join(root, ".claude/skills/start/SKILL.md")));
+    assert.ok(tracked.has(`.agents/skills/${name}/SKILL.md`), `${name} is not tracked`);
+  assert.ok(tracked.has(".claude/skills"), ".claude/skills link is not tracked");
 });
