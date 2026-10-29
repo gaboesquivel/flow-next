@@ -17,7 +17,7 @@ Build never merges. Run what the work needs while implementing; the full checks 
 
 **Proof.** The pull request is open or the branch is committed; the review the size guard picked ran on the final head with no blocking findings left; checks are green on that head; branch liveness is reported; the report lists work in flight (see Work in flight).
 
-Read the request, repository instructions, and code. Preserve unrelated working-tree changes. Do not add scope just because it is nearby. When intent is unclear for a new product or substantial feature, suggest `explore` and wait; never start exploration unasked. When behavior or accepted context changes, update owning documentation; do not replace a project's product identity with Flow's methodology identity. Link to specs or decisions instead of duplicating rationale; do not open new spec or decision files unless the user asked or the work already uses that convention.
+Read the request, repository instructions, and code. Preserve unrelated working-tree changes. Do not add scope just because it is nearby. When the change touches what users see, follow `DESIGN.md` when present. When intent is unclear for a new product or substantial feature, suggest `explore` and wait; never start exploration unasked. When behavior or accepted context changes, update owning documentation; do not replace a project's product identity with Flow's methodology identity. Link to specs or decisions instead of duplicating rationale; do not open new spec or decision files unless the user asked or the work already uses that convention.
 
 "Build it" on a draft spec accepts it in the build's first commit (`to-spec`'s Status and acceptance).
 
@@ -50,7 +50,7 @@ One home. Judge once, at intake, before implementing; it never stops the work. E
 
 ## Delivery mode
 
-One home; other skills link here. Infer the mode; never ask. GitHub mode when `origin` is a GitHub repository; local mode otherwise. When `origin` is on GitHub but `gh` is unavailable or unauthenticated, stop and say how to fix it (`gh auth login`); never fall back to local mode. A `Delivery:` line in the Flow block (`flow` owns it) or a mode named in the request overrides. A default branch that requires pull requests forces GitHub mode; when `gh` cannot reach it, stop and say so. Never record a mode the user did not give.
+One home; other skills link here. Infer the mode; never ask. GitHub mode when `origin` is a GitHub repository; local mode otherwise. When `origin` is on GitHub but `gh` is unavailable or unauthenticated, stop and hand off its sign-in as one command (`gh auth login`, per `write-agents` Tools); never fall back to local mode. A `Delivery:` line in the Flow block (`flow` owns it) or a mode named in the request overrides. A default branch that requires pull requests forces GitHub mode; when `gh` cannot reach it, stop and say so. Never record a mode the user did not give.
 
 - **GitHub mode:** one pull request per spec; `build` waits on its checks and `ship` merges it.
 - **Local mode:** one branch per spec; `build` checks it and `ship` merges it into `main`.

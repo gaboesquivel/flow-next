@@ -26,6 +26,9 @@ export const PHRASES = [
   ['"update the docs"', 'flow'],
 ]
 
+// The always-loaded form of `write-agents` Tools, so the rule holds outside skills too.
+export const TOOL_RULE = 'Do the work yourself: CLI, then MCP, then API, then browser. Hand the user only sign-in, secrets, payment, consent, or permission changes, once, as one command each (`write-agents` Tools).'
+
 const eolOf = (text) => (text.includes('\r\n') ? '\r\n' : '\n')
 
 export function normalizeDelivery(value) {
@@ -67,6 +70,8 @@ export function buildFlowBlock({ delivery, eol = '\n' } = {}) {
     '## Flow',
     '',
     'This project uses Flow skills. Say a phrase to load its skill; the installed `flow` skill describes this block. Delete the block to opt out.',
+    '',
+    TOOL_RULE,
     '',
     ...(mode ? [`Delivery: ${mode}`, ''] : []),
     ...alignTable([['Say', 'Skill'], ...PHRASES.map(([say, skill]) => [say, `\`${skill}\``])]),

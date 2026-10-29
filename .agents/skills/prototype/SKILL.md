@@ -1,12 +1,12 @@
 ---
 name: prototype
-description: Build a disposable experiment to answer a design, interaction, API, or logic question. Use when the user says "prototype this", "spike it", or "try a quick throwaway".
+description: Build a disposable experiment to answer an interaction, layout, API, or logic question. Use when the user says "prototype this", "spike it", or "try a quick throwaway".
 disable-model-invocation: false
 ---
 
 # Prototype
 
-State the question and the observation that would help answer it. Choose the smallest runnable artifact suited to the audience and existing environment:
+State the question and the observation that would help answer it. Choosing and recording a visual direction or identity is `design`'s; it may use the UI guidance below to render alternatives. Choose the smallest runnable artifact suited to the audience and existing environment:
 
 - Visual alternatives in a web application: [UI guidance](UI.md).
 - A nontechnical walkthrough of state transitions: [logic demo guidance](LOGIC.md).

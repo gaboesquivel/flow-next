@@ -36,6 +36,15 @@ This is the shared worker rule; other skills link here instead of restating it.
 - The main thread verifies findings and synthesizes results and disagreements. Record actual models when the host exposes them; distinguish model diversity from host diversity.
 - Without workers, run the same steps in order and say so. Never claim independence without separate execution.
 
+## Tools
+
+This is the shared tool rule; other skills link here instead of restating it. The agent does the work; the user directs it.
+
+- For each step, read or act through the first rung that can: an installed CLI (`gh`, `vercel`, a package script), then a connected MCP server or connector, then the service's API through an authenticated CLI (`gh api`, `vercel api`), then the host's browser automation. Never tell the user to open a dashboard or settings page for a step a rung can do.
+- Only these steps go to the user: signing in and OAuth consent; entering secrets, credentials, or payment details; accepting terms; changing the agent's own permission settings; anything the host's safety policy reserves for the user. Changing a security or protection setting also needs the user's explicit request; until then, read it and name the exact change.
+- Ask once. Collect every user-only step you can foresee into one message: each as one command (`vercel login`) or one exact URL, with its reason, never a click path. When the user says done, continue without asking again.
+- Try the rungs before reporting a blocker. A missing CLI is a hand-off: name it and its one install command.
+
 ## Repository
 
 This is the full repository rule; delivery skills state it in one line ("Outside a Git repository, offer `git init` and stop on a no."). Thinking skills need no repository: they may read Git when one exists but never require it or ask about delivery.
