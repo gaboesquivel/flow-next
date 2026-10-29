@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
-import { copyFileSync, existsSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { applyDataPreset, readDatabaseUrl, upsertEnvLine } from "./data-preset.mjs";
 
 const root = path.resolve(import.meta.dirname, "../..");
 const envExample = path.join(root, ".env.example");
@@ -33,5 +34,42 @@ if (!skipSkills && existsSync(path.join(agentsDir, "skills-lock.json"))) {
     execSync("pnpm install", { cwd: agentsDir, stdio: "inherit" });
   execSync("pnpm skills:install", { cwd: agentsDir, stdio: "inherit" });
 }
+
+const envFile = path.join(root, ".env.local");
+const envText = existsSync(envFile) ? readFileSync(envFile, "utf-8") : "";
+const linkFile = path.join(root, ".vercel/project.json");
+const link = existsSync(linkFile) ? JSON.parse(readFileSync(linkFile, "utf-8")) : {};
+const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf-8"));
+const preset = await applyDataPreset({
+  env: process.env,
+  local: {
+    databaseUrl: readDatabaseUrl(envText),
+    vercelOrgId: link.orgId,
+    vercelProjectId: link.projectId,
+  },
+  preset: process.env.FLOW_PRESET ?? "minimal",
+  projectName: pkg.name,
+});
+if (!preset.ok) {
+  console.error(preset.error);
+  process.exit(1);
+}
+if (preset.databaseUrl) {
+  const next = upsertEnvLine({
+    key: "DATABASE_URL",
+    text: existsSync(envFile) ? readFileSync(envFile, "utf-8") : envText,
+    value: preset.databaseUrl,
+  });
+  if (next.changed) writeFileSync(envFile, next.text);
+}
+if (preset.vercel) {
+  mkdirSync(path.dirname(linkFile), { recursive: true });
+  writeFileSync(
+    linkFile,
+    `${JSON.stringify({ orgId: preset.vercel.orgId, projectId: preset.vercel.projectId }, null, 2)}\n`,
+  );
+}
+if (preset.preset === "neon")
+  console.log(preset.reused ? "neon preset reused" : "neon preset configured");
 
 console.log("setup complete — review .env.local before running pnpm dev");
