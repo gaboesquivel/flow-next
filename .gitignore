@@ -24,3 +24,6 @@ mcp-app/dist
 .vercel
 test-results
 playwright-report
+
+# eve build output (pnpm build:agents)
+.output/
