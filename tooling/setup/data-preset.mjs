@@ -149,6 +149,11 @@ const provisionNeon = async ({ env, fetchImpl, local, projectName }) => {
       })
     : { created: false, ok: true, orgId: local.vercelOrgId, projectId: local.vercelProjectId };
   if (!link.ok) return link;
+  if (!env.VERCEL_TOKEN)
+    return {
+      error: "neon preset needs Vercel authorization before it writes environment",
+      ok: false,
+    };
 
   const database = needDatabase
     ? await findOrCreateDatabase({
@@ -159,11 +164,6 @@ const provisionNeon = async ({ env, fetchImpl, local, projectName }) => {
       })
     : { created: false, databaseUrl: local.databaseUrl, ok: true };
   if (!database.ok) return database;
-  if (!env.VERCEL_TOKEN)
-    return {
-      error: "neon preset needs Vercel authorization before it writes environment",
-      ok: false,
-    };
 
   const remoteEnv = await ensureVercelEnv({
     databaseUrl: database.databaseUrl,
