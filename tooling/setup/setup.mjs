@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { applyDataPreset, readDatabaseUrl, upsertEnvLine } from "./data-preset.mjs";
 
@@ -25,15 +25,9 @@ try {
 if (!existsSync(path.join(root, "node_modules")))
   execSync("pnpm install", { cwd: root, stdio: "inherit" });
 
-const skipSkills =
-  process.env.FLOW_SETUP_SKIP_SKILLS === "1" || process.env.FLOW_SETUP_SKIP_SKILLS === "true";
-
-const agentsDir = path.join(root, ".agents");
-if (!skipSkills && existsSync(path.join(agentsDir, "skills-lock.json"))) {
-  if (!existsSync(path.join(agentsDir, "node_modules")))
-    execSync("pnpm install", { cwd: agentsDir, stdio: "inherit" });
-  execSync("pnpm skills:install", { cwd: agentsDir, stdio: "inherit" });
-}
+// Skills are committed under .agents/skills; restore them from skills-lock.json only when missing.
+if (!existsSync(path.join(root, ".agents/skills")))
+  execSync("pnpm skills:install", { cwd: root, stdio: "inherit" });
 
 const envFile = path.join(root, ".env.local");
 const envText = existsSync(envFile) ? readFileSync(envFile, "utf-8") : "";
