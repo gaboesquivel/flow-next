@@ -1,4 +1,5 @@
 import { createGateway, gateway } from "@ai-sdk/gateway";
+import type { LanguageModel } from "ai";
 
 /** Vercel AI Gateway ids (dotted). `models.test.ts` checks them against the installed gateway's model list. */
 export const DEFAULT_CHAT_MODEL = "anthropic/claude-sonnet-5.5";
@@ -21,7 +22,7 @@ export const directModelId = (gatewayId: string) =>
 export const gatewayAvailable = (environment: Record<string, string | undefined> = process.env) =>
   Boolean(environment.AI_GATEWAY_API_KEY?.trim()) || environment.VERCEL === "1";
 
-export const gatewayModel = (id: string) => {
+export const gatewayModel = (id: string): LanguageModel => {
   const apiKey = env("AI_GATEWAY_API_KEY");
   return apiKey ? createGateway({ apiKey })(id) : gateway(id);
 };
