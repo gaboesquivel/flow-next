@@ -13,6 +13,7 @@
     "build": "pnpm run build:mcp-app && next build --webpack",
     "build:mcp-app": "vite build --config mcp-app/vite.config.ts",
     "start": "next start",
+    "db:migrate": "drizzle-kit push --force",
     "lint": "oxlint . && oxfmt --check .",
     "lint:fix": "oxlint --fix . && oxfmt --write --no-error-on-unmatched-pattern .",
     "format": "oxfmt --write --no-error-on-unmatched-pattern .",
