@@ -31,4 +31,5 @@ jobs:
       - run: pnpm security:check
       - run: pnpm qa
       - run: pnpm eval:offline
-      - run: pnpm build
+      # test already built the MCP App bundle; build only the Next.js app.
+      - run: pnpm exec next build --webpack

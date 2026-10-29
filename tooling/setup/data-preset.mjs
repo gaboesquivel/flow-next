@@ -42,7 +42,7 @@ export const upsertEnvLine = ({ text, key, value }) => {
   return { changed: true, text: `${lines.join("\n").replace(/\n*$/u, "")}\n` };
 };
 
-const findOrCreateVercel = async ({ fetchImpl, token, teamId, projectName }) => {
+const findOrCreateVercel = async ({ fetchImpl, token, teamId, projectName, rootDirectory }) => {
   const existing = await requestJson({
     fetchImpl,
     token,
@@ -58,7 +58,7 @@ const findOrCreateVercel = async ({ fetchImpl, token, teamId, projectName }) => 
   if (existing.status !== 404)
     return { error: `Vercel project lookup failed (${existing.status})`, ok: false };
   const created = await requestJson({
-    body: { framework: "nextjs", name: projectName },
+    body: { framework: "nextjs", name: projectName, ...(rootDirectory ? { rootDirectory } : {}) },
     fetchImpl,
     method: "POST",
     token,
@@ -130,7 +130,7 @@ const findOrCreateDatabase = async ({ fetchImpl, token, orgId, projectName }) =>
   return { created: true, databaseUrl, ok: true };
 };
 
-const provisionNeon = async ({ env, fetchImpl, local, projectName }) => {
+const provisionNeon = async ({ env, fetchImpl, local, projectName, rootDirectory }) => {
   const needDatabase = !local.databaseUrl;
   const needLink = !local.vercelProjectId;
   if ((needDatabase && !env.NEON_API_KEY) || (needLink && !env.VERCEL_TOKEN))
@@ -144,6 +144,7 @@ const provisionNeon = async ({ env, fetchImpl, local, projectName }) => {
     ? await findOrCreateVercel({
         fetchImpl,
         projectName,
+        rootDirectory,
         teamId: env.VERCEL_TEAM_ID,
         token: env.VERCEL_TOKEN,
       })
@@ -189,10 +190,11 @@ export const applyDataPreset = ({
   local = {},
   preset = "minimal",
   projectName,
+  rootDirectory,
 }) => {
   if (preset !== "neon") return { changed: false, ok: true, preset: "minimal" };
   if (!SLUG.test(projectName ?? "")) return { error: "project name must be a slug", ok: false };
   if (local.databaseUrl && local.vercelProjectId)
     return { changed: false, ok: true, preset: "neon", reused: true };
-  return provisionNeon({ env, fetchImpl, local, projectName });
+  return provisionNeon({ env, fetchImpl, local, projectName, rootDirectory });
 };

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Ship"
+  short_description: "Land accepted work: checks, merge or push, verify liveness"
+policy:
+  allow_implicit_invocation: true
