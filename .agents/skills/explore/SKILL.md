@@ -28,7 +28,7 @@ Match the request; never ask for a depth.
 
 **Metrics.** Keep existing definitions. Tie each metric to the core journey outcome it observes, for human and agent users. Define a new or changed metric by what counts, population, calculation, window, likely source, baseline (or "unknown"), and target; a target without evidence is a hypothesis. Say whether collection exists or is proposed, and when the source is unknown, name the smallest step to find it. Early discovery may use qualitative evidence.
 
-Use `interview`'s question forms only until intent is clear, and skip its restatement and confirmation: the brief's confirmation covers intent. For a new product, or when the user asks, follow `grill` on the riskiest claims, with the pre-mortem folded in. Deeper discovery (`competitors`, `jtbd`) runs only when the user asks; when evidence warrants one, suggest it in one line. Missing supporting skills never block: apply the same steps directly.
+Use `interview`'s question forms only until intent is clear, and skip its restatement and confirmation: the brief's confirmation covers intent. For a new product, or when the user asks, follow `grill` on the riskiest claims, with the pre-mortem folded in. Deeper discovery (`competitors`, `jtbd`) runs only when the user asks; when evidence warrants one, suggest it in one line. Visual direction is `design`'s: when the brief adds a surface whose look `DESIGN.md` does not settle, suggest it in one line, never as a required step. Missing supporting skills never block: apply the same steps directly.
 
 ## Outcome and write gate
 

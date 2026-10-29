@@ -31,7 +31,7 @@ Recover intent from the request, spec, tests, and decisions. Assess every axis t
 - **Architecture:** boundaries, duplication, conventions.
 - **Security:** trust boundaries, secrets, permissions.
 - **Performance:** scaling, repeated I/O, blocking paths.
-- **UI, only when the diff changes what users see:** labels and roles, contrast through the design tokens, focus and keyboard use, layout at phone width without horizontal scroll, and heading and visual hierarchy. Read the code for small changes; for new screens or escalated work, also look at the preview at phone and desktop widths when one exists. This is behavior, never deployment liveness.
+- **UI, only when the diff changes what users see:** consistency with `DESIGN.md` when present (tokens, canonical assets, usage rules, no retired marks), labels and roles, contrast through the design tokens, focus and keyboard use, layout at phone width without horizontal scroll, and heading and visual hierarchy. Read the code for small changes; for new screens or escalated work, also look at the preview at phone and desktop widths when one exists. This is behavior, never deployment liveness.
 
 Read the reviewed commit without changing any checkout you did not create (for example `git show`, `git diff`, or a temporary worktree you remove when done).
 

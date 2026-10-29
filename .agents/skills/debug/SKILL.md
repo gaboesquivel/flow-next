@@ -14,7 +14,7 @@ Fixes stay sequential: apply one cause at a time so each result is interpretable
 
 For a meaningful behavior fix, reproduce the failure with an automated test or a documented manual check before applying the correction. Use existing public test interfaces. Fix the cause within the authorized scope and verify both the original failure and relevant surrounding behavior.
 
-If attempts stop producing new evidence, reassess the hypothesis, dependencies, and architecture. Ask the user when the next step requires a consequential new decision, access, or authority; do not impose an arbitrary retry count as proof that architecture is wrong.
+If attempts stop producing new evidence, reassess the hypothesis, dependencies, and architecture. Ask the user when the next step requires a consequential new decision or authority; for access, use the tools first and hand off only what the user alone can do (`write-agents` Tools); do not impose an arbitrary retry count as proof that architecture is wrong.
 
 ## Techniques
 
