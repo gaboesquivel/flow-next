@@ -1,3 +1,4 @@
+import { gatewayAvailable } from "../../ai/models";
 import { validateCompositionEnvelope } from "../contract/compiler";
 import { openUiStringList, openUiStringLiteral } from "../contract/openui-text";
 import type { CompositionEnvelope } from "../core/envelope";
@@ -182,7 +183,7 @@ const tierThreeFailureEnvelope = ({
 }) => {
   const message =
     failureCode === "missing_credentials"
-      ? "Generation requires AI_GATEWAY_API_KEY for open layouts, or try a supported prompt such as customer support dashboard, metrics, plan comparison, or onboarding form."
+      ? "Generation requires the AI Gateway (Vercel OIDC or AI_GATEWAY_API_KEY) for open layouts, or try a supported prompt such as customer support dashboard, metrics, plan comparison, or onboarding form."
       : "The model returned a composition that failed validation. Try a simpler request or a supported starter prompt.";
   return statusDocument({
     message,
@@ -301,8 +302,7 @@ const composeCreatePath = async ({
   }
 
   tier = 3;
-  const apiKey = process.env.AI_GATEWAY_API_KEY?.trim();
-  if (apiKey) {
+  if (gatewayAvailable()) {
     const generated = await synthesizeOpenUiComposition({
       query,
       requestId,
@@ -372,8 +372,7 @@ export const composeQuery = async ({
   if (refining && input.priorEnvelope) {
     tier = 3;
     refined = true;
-    const apiKey = process.env.AI_GATEWAY_API_KEY?.trim();
-    if (apiKey) {
+    if (gatewayAvailable()) {
       const generated = await refineOpenUiComposition({
         priorEnvelope: input.priorEnvelope,
         query,

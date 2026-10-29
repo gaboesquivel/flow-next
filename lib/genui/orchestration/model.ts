@@ -1,6 +1,6 @@
 import { generateText } from "ai";
 
-const DEFAULT_GENUI_MODEL = "anthropic/claude-sonnet-4.6";
+import { gatewayAvailable, genuiModelId } from "../../ai/models";
 
 export const synthesizeOpenEndedAnswer = async ({
   query,
@@ -9,10 +9,9 @@ export const synthesizeOpenEndedAnswer = async ({
   query: string;
   signal?: AbortSignal;
 }) => {
-  const apiKey = process.env.AI_GATEWAY_API_KEY?.trim();
-  if (!apiKey) return null;
+  if (!gatewayAvailable()) return null;
 
-  const model = process.env.GENUI_MODEL?.trim() || DEFAULT_GENUI_MODEL;
+  const model = genuiModelId();
 
   const result = await generateText({
     abortSignal: signal,

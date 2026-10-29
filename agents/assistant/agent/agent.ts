@@ -1,6 +1,8 @@
 import { defineAgent } from "eve";
 
+import { eveModelId } from "@/lib/ai/models";
+
 export default defineAgent({
-  model: process.env.EVE_AGENT_MODEL?.trim() ?? "anthropic/claude-sonnet-4-20250514",
+  model: eveModelId(),
   modelContextWindowTokens: 200_000,
 });
