@@ -49,7 +49,7 @@ test("minimal preset does not call the network", async () => {
       return json({});
     },
     preset: "minimal",
-    projectName: "flow-next",
+    projectName: "acme-app",
   });
   assert.equal(result.ok, true);
   assert.equal(result.preset, "minimal");
@@ -64,7 +64,7 @@ test("neon preset fails closed without authorization", async () => {
       return json({});
     },
     preset: "neon",
-    projectName: "flow-next",
+    projectName: "acme-app",
   });
   assert.equal(result.ok, false);
   assert.match(result.error, /authorization/u);
@@ -80,7 +80,7 @@ test("neon preset reuses a linked project and database", async () => {
     },
     local: { databaseUrl: "neon-connection-fixture", vercelProjectId: "prj_1" },
     preset: "neon",
-    projectName: "flow-next",
+    projectName: "acme-app",
   });
   assert.equal(result.reused, true);
   assert.equal(result.changed, false);
@@ -93,7 +93,7 @@ test("neon preset creates once and does not echo secrets in errors", async () =>
   const fetchImpl = (url, init) => {
     calls.push(`${init?.method ?? "GET"} ${url}`);
     const href = String(url);
-    if (href.includes("/v9/projects/flow-next") && !href.includes("/env")) return json({}, 404);
+    if (href.includes("/v9/projects/acme-app") && !href.includes("/env")) return json({}, 404);
     if (href.endsWith("/v10/projects") || href.includes("/v10/projects?"))
       return json({ accountId: "team_1", id: "prj_1" });
     if (href.includes("/connection_uri")) return json({}, 404);
@@ -107,7 +107,7 @@ test("neon preset creates once and does not echo secrets in errors", async () =>
     env: { NEON_API_KEY: "neon-key", VERCEL_TOKEN: "vercel-token" },
     fetchImpl,
     preset: "neon",
-    projectName: "flow-next",
+    projectName: "acme-app",
   });
   assert.equal(result.ok, true);
   assert.equal(result.databaseUrl, "neon-connection-fixture");
@@ -118,14 +118,14 @@ test("neon preset creates once and does not echo secrets in errors", async () =>
     fetchImpl,
     local: { databaseUrl: result.databaseUrl, vercelProjectId: result.vercel.projectId },
     preset: "neon",
-    projectName: "flow-next",
+    projectName: "acme-app",
   });
   assert.equal(again.reused, true);
   const failed = await applyDataPreset({
     env: { NEON_API_KEY: "neon-key", VERCEL_TOKEN: "vercel-token" },
     fetchImpl: () => json({ connection_uri: "neon-connection-fixture" }, 500),
     preset: "neon",
-    projectName: "flow-next",
+    projectName: "acme-app",
   });
   assert.equal(failed.ok, false);
   assert.doesNotMatch(failed.error, /neon-connection-fixture/u);
