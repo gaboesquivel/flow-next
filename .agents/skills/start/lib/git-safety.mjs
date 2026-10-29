@@ -1,7 +1,7 @@
-import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readlinkSync, statSync, symlinkSync } from 'node:fs'
+import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, statSync, symlinkSync } from 'node:fs'
 import { join } from 'node:path'
 import { execSync } from 'node:child_process'
-import { AGENT_SETUP_ENTRY_NAMES, TEMPLATE_GITHUB } from './constants.mjs'
+import { AGENT_SETUP_ENTRY_NAMES, TEMPLATE_GITHUB, TEMPLATE_IDS } from './constants.mjs'
 
 const templateRemotePatterns = Object.values(TEMPLATE_GITHUB).flatMap((repo) => [
   `https://github.com/${repo}.git`,
@@ -14,12 +14,35 @@ export const isTemplateRemoteUrl = (url) => {
   return templateRemotePatterns.some((pattern) => normalized === pattern.replace(/\/$/u, ''))
 }
 
+// A clean clone of a template (or a repository created from one) is initialized in place:
+// its package name is still the template id and its tree has no uncommitted changes.
+export const detectTemplateCheckout = ({ destinationPath }) => {
+  const packageJson = join(destinationPath, 'package.json')
+  if (!existsSync(join(destinationPath, '.git')) || !existsSync(packageJson)) return null
+  let name
+  try {
+    name = JSON.parse(readFileSync(packageJson, 'utf8')).name
+  } catch {
+    return null
+  }
+  if (!TEMPLATE_IDS.includes(name)) return null
+  try {
+    const status = execSync('git status --porcelain', { cwd: destinationPath, encoding: 'utf8', stdio: 'pipe' })
+    return status.trim() ? null : name
+  } catch {
+    return null
+  }
+}
+
 // Agent-setup entries (see AGENT_SETUP_ENTRY_NAMES) plus any user-confirmed `preserve`
 // names do not make a destination "nonempty": the template is copied around them.
 export const assessDestination = ({ destinationPath, allowNonempty = false, preserve = [] }) => {
   if (!destinationPath?.trim()) return { ok: false, reason: 'Destination path is required.' }
 
   if (!existsSync(destinationPath)) return { ok: true, preserved: [] }
+
+  const template = detectTemplateCheckout({ destinationPath })
+  if (template) return { ok: true, preserved: [], inPlace: true, template }
 
   const keep = new Set([...AGENT_SETUP_ENTRY_NAMES, ...preserve])
   const entries = readdirSync(destinationPath).filter((name) => name !== '.git')

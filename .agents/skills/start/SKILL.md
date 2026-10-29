@@ -45,7 +45,9 @@ Otherwise clone the template into a temporary directory and copy it into the des
 
 **Bootstrapping in place.** A destination that holds only agent setup (`AGENT_SETUP_ENTRY_NAMES`, `lib/constants.mjs`) counts as empty; bootstrap at that root. Keep those files, adding only the Flow block and the `@AGENTS.md` import; when the template ships its own copy of a kept file, report it in `skipped`. Pass other files the user chose to keep as `preserve`.
 
-**Stop** when the destination has unexpected files without authorization or already has Git commits. Never `reset`, `clean`, or delete history.
+**Template checkout.** When `assessDestination` returns `inPlace` (a clean clone of flow-next or flow-mono, or a repository created from one), the destination already is the template: skip the copy, take the template from the result, and initialize at its root. Remove an `origin` that points at the template repository (`assertNoTemplateOrigin`); keep its history.
+
+**Stop** when the destination has unexpected files without authorization or has Git commits that are not a clean template checkout. Never `reset`, `clean`, or delete history.
 
 ## Rename template identifiers
 
@@ -53,7 +55,7 @@ Use `renameAllowlistForTemplate`, `applyRenamesInTree`, and `scanTreeForStaleIde
 
 ## Dependencies and setup
 
-Run the template's `pnpm setup` with `FLOW_PRESET` set to the preset. It installs the template's technical skills; do not install flow-skills into the new repository, but keep them when the user already installed them there. Do not set `FLOW_SETUP_SKIP_SKILLS` unless asked. The template's setup owns hosting and database provisioning and fails closed for `neon` without authorization.
+Run the template's `pnpm setup` with `FLOW_PRESET` set to the preset. The template's skills lock already carries Flow and its technical skills; keep them and do not install flow-skills a second time. The template's setup owns hosting and database provisioning and fails closed for `neon` without authorization.
 
 ## Baseline product documentation
 
@@ -61,7 +63,7 @@ Write `PRODUCT.md`, `DESIGN.md`, `ARCHITECTURE.md`, and `GLOSSARY.md` for **this
 
 ## Flow block
 
-Write the Flow block with the `flow` skill's `lib/flow-block.mjs`, passing the project's absolute path; `flow`'s [Flow block](../flow/SKILL.md#flow-block) section owns the layout. Keep the helper's output, including any refusal, for the report. Touch nothing outside the markers and the import line. Without `flow`, skip the block and say so.
+Write the Flow block with the `flow` skill's `lib/flow-block.mjs`, passing the project's absolute path; `flow`'s Flow block section owns the layout. Keep the helper's output, including any refusal, for the report. Touch nothing outside the markers and the import line. Without `flow`, skip the block and say so.
 
 ## Bootstrap order
 

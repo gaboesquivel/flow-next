@@ -33,7 +33,7 @@ This skill runs when the user asks or invokes `/flow`, or when `build` and `revi
 
 **Repository.** The block needs Git; aligning root files does not. Outside a Git repository, offer `git init` and stop on a no.
 
-**Delivery.** Delivery mode is inferred as `build`'s [Delivery mode](../build/SKILL.md#delivery-mode) describes, so the block's `Delivery:` line is an optional override: write it only when the user names a mode (`local` or `github`), and keep a recorded one unless the user names another. Never ask for it.
+**Delivery.** Delivery mode is inferred (GitHub mode when `origin` is on GitHub, local otherwise; `build`'s Delivery mode has the rest), so the block's `Delivery:` line is an optional override: write it only when the user names a mode (`local` or `github`), and keep a recorded one unless the user names another. Never ask for it.
 
 **Write** with this skill's [`lib/flow-block.mjs`](lib/flow-block.mjs): `node <skill-dir>/lib/flow-block.mjs <absolute-project-path> [local|github]`. A legacy `pull-request` value is read and rewritten as `github`; `unset` is dropped. The helper owns the layout and block rules: which file holds the block, the `@AGENTS.md` import, markers, the phrase table (`PHRASES`), keeping the recorded value, moving a stale block out of an ignored `AGENTS.md`, and refusing malformed markers or symlinked, out-of-project, or shared instruction files. Never touch text outside the markers and that import line.
 

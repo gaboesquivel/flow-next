@@ -30,11 +30,11 @@ A spec's `Status:` line reads `candidate`, `draft`, `accepted`, `implemented`, o
 
 A draft without an acceptance scenario, or without an **Exposure** line when it adds deployable behaviour, stays `draft`: name what is missing and stop the request. A `candidate` must become a full draft first. Changing an accepted spec's scope or a decision it links returns it to `draft`. Report the files changed.
 
-**Share the draft** (comments before acceptance): push the branch and open a draft pull request whose body links the spec file; in local mode ([delivery mode](../build/SKILL.md#delivery-mode)) there is nothing to open, so report the file. On a public repository, say the branch becomes public.
+**Share the draft** (comments before acceptance): push the branch and open a draft pull request whose body links the spec file; in local mode (`origin` is not on GitHub, or the user named local) there is nothing to open, so report the file. On a public repository, say the branch becomes public.
 
 ## Process
 
-1. Explore the repository only for what the conversation does not already hold (fan-out rule: `write-agents` Workers): existing specs and decisions, code seams and tests, and the glossary. Use the project's domain vocabulary. Before writing, check for contradictions with accepted decisions, specs, and `PRODUCT.md` through `explore`'s [Direction changes](../explore/SKILL.md#direction-changes) gate, asking only about conflicts not already confirmed in this conversation or in a Proposed record on the current branch.
+1. Explore the repository only for what the conversation does not already hold (fan-out rule: `write-agents` Workers): existing specs and decisions, code seams and tests, and the glossary. Use the project's domain vocabulary. Before writing, check for contradictions with accepted decisions, specs, and `PRODUCT.md` (a goal that would reverse or narrow an Accepted decision, an accepted spec, or a `PRODUCT.md` fact stops for an explicit yes, as `explore`'s Direction changes describes), asking only about conflicts not already confirmed in this conversation or in a Proposed record on the current branch.
 
 2. Sketch test seams at the highest practical level. Prefer existing seams.
 

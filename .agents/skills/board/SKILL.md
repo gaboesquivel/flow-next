@@ -34,7 +34,7 @@ A card shows the spec number, title, task progress (`done/total`, from `- [x] NN
 
 **Stages.** An open spec branch is Building only when it changes something outside `docs/`; otherwise a ticked task moves the card, a draft stays in Specced, and an accepted spec with tasks sits in Ready. A spec with `Status: dropped`, or one that exists only on a branch whose pull request closed unmerged, leaves the columns; `--json` lists it under `dropped`.
 
-**GitHub links** (when `gh` is installed and authenticated, and delivery is not `local`; an unset `Delivery` follows `build`'s [inference](../build/SKILL.md#delivery-mode)): cards also link the pull request (head branch matches the slug, or its body closes a task issue) and any task issues, with each state in text. When GitHub cannot be reached, the board renders from git alone and its header says why; pass that note on, never treat it as an error. `--no-github` skips `gh` entirely.
+**GitHub links** (when `gh` is installed and authenticated, and delivery is not `local`; an unset `Delivery` means GitHub when `origin` is on GitHub): cards also link the pull request (head branch matches the slug, or its body closes a task issue) and any task issues, with each state in text. When GitHub cannot be reached, the board renders from git alone and its header says why; pass that note on, never treat it as an error. `--no-github` skips `gh` entirely.
 
 Markers flag what needs a human look:
 

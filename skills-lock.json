@@ -23,13 +23,13 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/board/SKILL.md",
-      "computedHash": "82028fbfbcbeefcab9b8b7a268eb497e811cf3042295785c60c8d3861676a70a"
+      "computedHash": "d15033c1f98b3a2d45e922b665ee9fa88e051e408d0225246986676a0cf8785c"
     },
     "build": {
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/build/SKILL.md",
-      "computedHash": "77fe1bb8cd7c289effede0641354fb13a9147aba50a2ce1ba4c563c22050e098"
+      "computedHash": "cf0387502c39316507ec57863e5a7e7e962a53a2f39c0130859cda54485ef6c5"
     },
     "building-components": {
       "source": "vercel/components.build",
@@ -53,7 +53,7 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/debug/SKILL.md",
-      "computedHash": "7f18347867ca60aa7e1a3190611c425687ee3e4a87da8f11606eefa57e7604a0"
+      "computedHash": "08d5f4994bb14bf38f47f840fed81a49a1b8ad799e3e36eafe95cff50d0164b4"
     },
     "domain-modeling": {
       "source": "gaboesquivel/flow-skills",
@@ -71,19 +71,19 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/explore/SKILL.md",
-      "computedHash": "d1e8d5e97a734d28bb764a3f9b2224d72a0c22f5c89be23574d7c594a09ce5f4"
+      "computedHash": "5c198c06b19e0882c19a36a5176129eba4aecfdd0a121d3e3b59d054759dc90f"
     },
     "flow": {
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/flow/SKILL.md",
-      "computedHash": "a4234d47891f40793001814db9b0bcc14ccae22448ee72d618ec25aed96bfebf"
+      "computedHash": "194522f169eddfb87b7d2f64e273e28133e80ec74bcb4e0edbada7a98c378938"
     },
     "grill": {
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/grill/SKILL.md",
-      "computedHash": "7785b75953d84dbd1df684903738286499f0e4c670765bb00c8a6f9166b87293"
+      "computedHash": "d7a4ac2be9c1d007cd309b02fc733e52da1613503af2f97da5a1fcd5e799db07"
     },
     "handoff": {
       "source": "gaboesquivel/flow-skills",
@@ -167,13 +167,13 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/ship/SKILL.md",
-      "computedHash": "25ff4b2523a08a459024a670f294f90d300523d9041890f778d3a9b66a679a14"
+      "computedHash": "6b4b510d709175782941d4bb57e932de53320015e0354e47228580d2bd355afa"
     },
     "start": {
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/start/SKILL.md",
-      "computedHash": "713f76dfd11360e825171f7b461148829f93fd211632e66242f13c352d70f5ea"
+      "computedHash": "d1f9283218162e39c6b9121b47c6316993c7567c6a8905846a4bbc92ddb6a05e"
     },
     "test-driven-development": {
       "source": "addyosmani/agent-skills",
@@ -191,7 +191,7 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/to-spec/SKILL.md",
-      "computedHash": "1a0f141fbcd04bd242bc6beccde2c190c2c7d02b9d0fd4b5135a1013332ff376"
+      "computedHash": "00aebe376843adbda66f2ef40296ea78d4cdc2441470d2430432435f07c184b9"
     },
     "to-tasks": {
       "source": "gaboesquivel/flow-skills",
@@ -239,7 +239,7 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/write-agents/SKILL.md",
-      "computedHash": "72af0878bbf4f7ce78010e07263e6f8171b503d305394d027039dda6eaa09194"
+      "computedHash": "5f7488f22c701abdc35141604515aa6efb2d5b1a7ad1854f362ee51518652c39"
     },
     "write-humans": {
       "source": "gaboesquivel/flow-skills",

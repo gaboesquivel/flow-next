@@ -16,16 +16,16 @@ Asking to ship authorizes these steps with no confirmation. It does not authoriz
 
 ## Preflight
 
-Outside a Git repository, offer `git init` and stop on a no. Fetch, then read branch, worktrees, status, remote, and `build`'s [delivery mode](../build/SKILL.md#delivery-mode) with parallel tool calls.
+Outside a Git repository, offer `git init` and stop on a no. Fetch, then read branch, worktrees, status, remote, and the delivery mode with parallel tool calls: GitHub mode when `origin` is on GitHub, local otherwise; a `Delivery:` line or the request overrides, and `build`'s Delivery mode has the rest.
 
 **Target.** "Ship it" means ship: never ask whether to. Ship the named work, else the current branch; on the default branch, the one unmerged work branch that holds the others, asking only when several remain. When another agent is still pushing, never edit its checkout or race it: wait, then ship the pushed head.
 
-**Leftovers.** Finish this work's items in `build`'s [Work in flight](../build/SKILL.md#work-in-flight) first. A failed task is not runnable: refuse a spec with unfinished tasks unless the user says to ship it partial. Report unrelated leftovers without touching them; stop when local `main` is ahead of its remote with commits that are not this work. A decision record this work links or adds that is still **Proposed** after acceptance stops the landing.
+**Leftovers.** First integrate this work's worker branches, worktrees, and uncommitted changes into the delivery branch (`build`'s Work in flight). A failed task is not runnable: refuse a spec with unfinished tasks unless the user says to ship it partial. Report unrelated leftovers without touching them; stop when local `main` is ahead of its remote with commits that are not this work. A decision record this work links or adds that is still **Proposed** after acceptance stops the landing.
 
 Classify the work:
 
 - **Spec work:** `accepted` or `implemented` passes. "Ship it" on a `draft` accepts it as `to-spec`'s accept step describes, in the first commit ship or `build` makes. A draft that cannot be accepted, any other status, or a spec that cannot be resolved stops ship: say what is wrong. A complete spec still missing `Status: implemented` gets it in the landed change.
-- **Unspecced work:** `build`'s [Size guard](../build/SKILL.md#size-guard) decides its review.
+- **Unspecced work:** the size guard decides its review: the pull request's recorded result, else judge the diff once as `build`'s Size guard describes, treating uncertain as escalated.
 
 ## Build
 
@@ -44,7 +44,7 @@ On red, fix on the branch as `build` describes and check the new head, at most t
 
 Run `review` only when the size guard escalated (per the pull request, else judged once on the diff) or the user asked ("review it"); otherwise build's self-check stands. Review the head you will land, alongside the checks. In GitHub mode, post the result on the pull request as a comment or COMMENT-type review, never an approval.
 
-An `unmet` acceptance scenario [verdict](../review/SKILL.md#inspect) and every blocking finding block landing; fix as Checks describes. Re-review only when the fix touches code beyond the findings.
+An `unmet` acceptance scenario verdict and every blocking finding block landing; fix as Checks describes. Re-review only when the fix touches code beyond the findings.
 
 ## Merge
 
