@@ -1,6 +1,8 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
+import { gatewayAvailable, genuiModelId } from "../../ai/models";
+
 import { validateCompositionEnvelope } from "../contract/compiler";
 import type { CompositionEnvelope, GroundedRecord } from "../core/envelope";
 import { GENUI_LIBRARY_VERSION } from "../core/envelope";
@@ -14,8 +16,6 @@ export interface ComposeTurn {
   content: string;
   role: "assistant" | "user";
 }
-
-const DEFAULT_GENUI_MODEL = "anthropic/claude-sonnet-4.6";
 
 const generationSchema = z.object({
   fallbackText: z.string().min(1).max(400),
@@ -36,10 +36,9 @@ export const synthesizeOpenUiComposition = async ({
   requestId: string;
   signal?: AbortSignal;
 }): Promise<CompositionEnvelope | null> => {
-  const apiKey = process.env.AI_GATEWAY_API_KEY?.trim();
-  if (!apiKey) return null;
+  if (!gatewayAvailable()) return null;
 
-  const model = process.env.GENUI_MODEL?.trim() || DEFAULT_GENUI_MODEL;
+  const model = genuiModelId();
   const seedRecords = [...acmeCatalogRecords, ...supportDashboardRecords];
 
   const result = await generateObject({
@@ -93,10 +92,9 @@ export const refineOpenUiComposition = async ({
   signal?: AbortSignal;
   turns?: ComposeTurn[];
 }): Promise<CompositionEnvelope | null> => {
-  const apiKey = process.env.AI_GATEWAY_API_KEY?.trim();
-  if (!apiKey) return null;
+  if (!gatewayAvailable()) return null;
 
-  const model = process.env.GENUI_MODEL?.trim() || DEFAULT_GENUI_MODEL;
+  const model = genuiModelId();
   const transcript = turnTranscript(turns);
 
   const result = await generateObject({
