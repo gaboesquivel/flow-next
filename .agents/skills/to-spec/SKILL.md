@@ -8,7 +8,7 @@ disable-model-invocation: false
 
 Turn conversation context and repository understanding into a proportionate specification. Do not run a separate interview; synthesize what is already known and label unresolved assumptions rather than inventing decisions.
 
-Use the project's existing spec location and numbering; with no convention, write `docs/specs/NNN-short-name.md` (three-digit sequence, kebab-case slug). Outside a Git repository, offer `git init` and stop on a no. Commit on the work's branch, never the default branch, candidate stubs included: the branch already open for this work (exploration included), or a new one named for the spec. The spec merges with the work.
+Use the project's existing spec location and numbering; with no convention, write `docs/specs/NNN-short-name.md` (three-digit sequence, kebab-case slug). Take a number no local or remote branch already uses. Outside a Git repository, offer `git init` and stop on a no. Commit on the work's branch, never the default branch, candidate stubs included: the branch already open for this work (exploration included), or a new one named for the spec. The spec merges with the work.
 
 **Spec, tasks, decision.** A spec is one bet: it tests one assumption and ships as one unit. Its tasks are the slices inside it, so a spec may be large. Work that only makes sense after seeing how another bet did gets its own spec. A choice gets a decision record in `docs/decisions/NNNN-short-name.md` (four-digit sequence) only when it chose among real alternatives **and** reaches beyond this spec or is costly to reverse; otherwise it belongs in the spec's Implementation Decisions. Never put feature scope or tasks in a decision record. When a spec makes a choice that passes the test, write the record beside the spec with status **Proposed** and link it from the spec. Also link any **Proposed** records written during exploration that the spec depends on.
 
@@ -72,7 +72,7 @@ When a prototype encodes a decision more precisely than prose (state machine, sc
 
 What good tests mean here, which behavior is in scope, and prior art in the codebase.
 
-**Acceptance scenario** (required; `review` gives each step a verdict): one representative end-to-end journey. Name the actor, the starting state with realistic data, and numbered steps with the observable result of each. When the spec names agent users, give the same journey through the agent interface (MCP tool).
+**Acceptance scenario** (required; `review` gives each step a verdict): one representative end-to-end journey. Name the actor, the starting state with realistic data, and numbered steps with the observable result of each. When the spec names agent users, give the same journey through the agent interface (MCP tool). When the work should move a defined metric or journey, reference its definition, name the source or instrumentation and calculation, and add a step proving an outcome is counted correctly: failures excluded, retries and duplicates counted once, human and agent attributed when that changes the count. Reuse existing collection; label unknowns instead of assuming infrastructure. Unrelated work gets no measurement.
 
 ## Direction changes
 

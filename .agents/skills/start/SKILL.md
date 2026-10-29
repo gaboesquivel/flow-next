@@ -28,7 +28,7 @@ The bootstrap lane reports blockers rather than asking, so settle every question
 
 Once nothing is open:
 
-- **Bootstrap lane.** A worker runs every section from "Obtain template" through "Deployment" and reports the completion facts.
+- **Bootstrap lane.** A worker runs "Obtain template", "Bootstrap", and "Deployment" and reports the completion facts.
 - **Explore lane.** The main session hands the conversation to `explore` as a new-product run, using the user's description as its first input. Explore writes nothing until the bootstrap lane reports its initial commit.
 
 Without independent workers, run the bootstrap first, then `explore`, and say so. Without `explore`, finish the bootstrap and suggest exploring next. A failed bootstrap does not discard the exploration: report the blocker and keep exploring.
@@ -49,25 +49,18 @@ Otherwise clone the template into a temporary directory and copy it into the des
 
 **Stop** when the destination has unexpected files without authorization or has Git commits that are not a clean template checkout. Never `reset`, `clean`, or delete history.
 
-## Rename template identifiers
+## Bootstrap
 
-Use `renameAllowlistForTemplate`, `applyRenamesInTree`, and `scanTreeForStaleIdentifiers` from `lib/rename.mjs`; do not widen the allowlist with a global replace. Preserve package imports (`@repo/ui`, `web`) and legitimate template-repository references (`STALE_SCAN_PRESERVE_REL_PATHS` and `STALE_SCAN_SKIP_DIR_NAMES` in `lib/constants.mjs`).
+Once the destination holds the template, run `node <skill-dir>/lib/bootstrap.mjs <destination> <project-name> --preset <preset>` and keep its JSON output for the report. It is the one supported path; do not reimplement its steps. In order, it:
 
-## Dependencies and setup
+- removes remotes that point at a template repository;
+- renames template identifiers through the allowlist in `lib/rename.mjs` (never a global replace; package imports such as `@repo/ui` and `web` stay);
+- runs the template's `pnpm setup` with `FLOW_PRESET`, which owns hosting and database provisioning and fails closed for `neon` without authorization. The template's skills lock already carries Flow; do not install flow-skills a second time;
+- writes `PRODUCT.md`, `DESIGN.md`, `ARCHITECTURE.md`, and `GLOSSARY.md` for this product, keeping any that exist, never Flow's mission or principles;
+- writes the Flow block and the `@AGENTS.md` import with the `flow` skill's helpers (nothing outside the markers and that import line), or reports them skipped when `flow` is not installed;
+- formats, runs the checks below, and commits `chore: initialize <slug>` only when every check passed, the Flow block's file is tracked, and nothing staged is a secret or build output.
 
-Run the template's `pnpm setup` with `FLOW_PRESET` set to the preset. The template's skills lock already carries Flow and its technical skills; keep them and do not install flow-skills a second time. The template's setup owns hosting and database provisioning and fails closed for `neon` without authorization.
-
-## Baseline product documentation
-
-Write `PRODUCT.md`, `DESIGN.md`, `ARCHITECTURE.md`, and `GLOSSARY.md` for **this product** with `buildBaselineDocs` from `lib/baseline-docs.mjs`: template name, commit SHA, slug and host, and the template route shell. Do not copy Flow's mission, tagline, or principles.
-
-## Flow block
-
-Write the Flow block with the `flow` skill's `lib/flow-block.mjs`, passing the project's absolute path; `flow`'s Flow block section owns the layout. Keep the helper's output, including any refusal, for the report. Touch nothing outside the markers and the import line. Without `flow`, skip the block and say so.
-
-## Bootstrap order
-
-The steps share one tree: run independent ones as concurrent processes, not workers, and start a step only after those whose files it reads (the renames finish before `pnpm setup`). Format every file the bootstrap wrote or renamed with the project's formatter, and run the checks after the last write.
+Exit 0 means committed with a clean tree; otherwise `blockers` names what stopped it. Never commit around a blocker or with `--no-verify`.
 
 ## Verification
 
@@ -80,11 +73,7 @@ Record each check as **passed**, **failed**, or **unavailable**. The template's 
 | identity_scan | `scanTreeForStaleIdentifiers` returns no issues |
 | gitignore_artifacts | `git check-ignore` for `.env.local`, `node_modules`, `.next` |
 
-If any check failed, report the blocker; do not claim success or create the initial commit.
-
-## Initial commit
-
-Commit with `chore: initialize <slug>` (`formatInitialCommitMessage`) only when `canCreateInitialCommit` from `lib/commit-gate.mjs` returns ok, the helper reports any Flow block's file tracked, and the staged files hold no secrets or build artifacts. Never use `--no-verify`. After it, `git status` is clean and no remote points at a template repository.
+If any check failed, report the blocker; do not claim success or create the initial commit. After the commit, `git status` is clean and no remote points at a template repository.
 
 ## Deployment
 

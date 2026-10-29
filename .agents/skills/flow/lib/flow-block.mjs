@@ -22,6 +22,7 @@ export const PHRASES = [
   ['"build it"', 'build'],
   ['"check it against the spec"', 'review'],
   ['"ship it" (add "local" or "with GitHub" for one run)', 'ship'],
+  ['"push it"', 'push'],
   ['"update the docs"', 'flow'],
 ]
 
