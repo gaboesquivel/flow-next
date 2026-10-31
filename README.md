@@ -16,13 +16,14 @@ Then ask your agent to `/start` (or say "start a new project"): Flow's skills sh
 
 ## Scripts
 
-| Script       | Purpose                                    |
-| ------------ | ------------------------------------------ |
-| `pnpm setup` | Dependencies, `.env.local`, optional Neon  |
-| `pnpm dev`   | Development via Portless                   |
-| `pnpm qa`    | Lint, types, tests                         |
-| `pnpm build` | Production build (includes MCP App bundle) |
-| `pnpm eval`  | Offline GenUI eval + Eve tool smoke        |
+| Script        | Purpose                                    |
+| ------------- | ------------------------------------------ |
+| `pnpm setup`  | Dependencies, `.env.local`, optional Neon  |
+| `pnpm dev`    | Development via Portless                   |
+| `pnpm qa`     | Lint, types, tests                         |
+| `pnpm format` | Format files in place (CI only checks)     |
+| `pnpm build`  | Production build (includes MCP App bundle) |
+| `pnpm eval`   | Offline GenUI eval + Eve tool smoke        |
 
 ## Surfaces
 
