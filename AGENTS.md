@@ -4,18 +4,18 @@ Single-app agentic Next.js template (App Router, Eve, OpenUI GenUI, MCP). Node 2
 
 ## Commands
 
-| Command                | Purpose                                                    |
-| ---------------------- | ---------------------------------------------------------- |
-| `pnpm setup`           | Dependencies, `.env.local`, optional Neon (`FLOW_PRESET`)  |
-| `pnpm dev`             | Development via Portless (`pnpm dev:app` for `next dev`)   |
-| `pnpm qa`              | Lint, types, tests                                         |
-| `pnpm lint:fix`        | Fix lint and format in place                               |
-| `pnpm test`            | MCP App bundle, Vitest, node tests                         |
-| `pnpm security:check`  | Tracked secret-file check and dependency audit             |
-| `pnpm build`           | Production build (includes the MCP App bundle)             |
-| `pnpm eval`            | Offline GenUI eval and Eve tool smoke (on demand, not CI)  |
-| `pnpm db:migrate`      | Push the Drizzle schema to `DATABASE_URL`                  |
-| `pnpm skills:update`   | Refresh committed skills from their sources (maintainers)  |
+| Command               | Purpose                                                   |
+| --------------------- | --------------------------------------------------------- |
+| `pnpm setup`          | Dependencies, `.env.local`, optional Neon (`FLOW_PRESET`) |
+| `pnpm dev`            | Development via Portless (`pnpm dev:app` for `next dev`)  |
+| `pnpm qa`             | Lint, types, tests                                        |
+| `pnpm lint:fix`       | Fix lint and format in place                              |
+| `pnpm test`           | MCP App bundle, Vitest, node tests                        |
+| `pnpm security:check` | Tracked secret-file check and dependency audit            |
+| `pnpm build`          | Production build (includes the MCP App bundle)            |
+| `pnpm eval`           | Offline GenUI eval and Eve tool smoke (on demand, not CI) |
+| `pnpm db:migrate`     | Push the Drizzle schema to `DATABASE_URL`                 |
+| `pnpm skills:update`  | Refresh committed skills from their sources (maintainers) |
 
 ## Tools
 
