@@ -29,6 +29,7 @@ playwright-report
 .output/
 
 # Agent hosts: shared config is committed, per-machine state is not
+.worktrees/
 .claude/worktrees/
 !.claude/settings.local.json
 .cursor/*

@@ -55,16 +55,20 @@ Work with no spec or task is unspecced. Write a spec or tasks only when the user
 
 ### Size guard
 
-One home. Judge once, at intake, before implementing; it never stops the work. Escalate for new product behavior, data shape or public API changes, migrations, or touches to authentication or permissions; secrets or credentials handling; dependencies or lockfiles; CI, workflow, or Git hook configuration; shell, exec, or filesystem-execution paths. When the size is uncertain, treat it as escalated.
+One home. Judge once, at intake, before implementing; it never stops the work. Escalate for new product behavior, data shape or public API changes, migrations ([Data changes](#data-changes)), or touches to authentication or permissions; secrets or credentials handling; dependencies or lockfiles; CI, workflow, or Git hook configuration; shell, exec, or filesystem-execution paths. When the size is uncertain, treat it as escalated.
 
 - **Small:** build runs one single-agent self-check on `review`'s axes, UI included when the diff changes what users see, with fix rounds.
 - **Escalated, or the user asked ("review it"):** the independent `review`, run in Verify.
+
+### Data changes
+
+One home. A change to stored data's shape ships as a versioned migration committed with the code; never apply a schema directly to a shared or deployed database without a migration file. A destructive step loses data or breaks the running version (dropping, renaming, or narrowing a table or column). It follows `to-tasks`' expand–contract sequence, whose backfills are not destructive steps; when that sequence cannot apply, it waits for the user's yes. Either way, name its rollback or backup first. A deployment never seeds, resets, or truncates a shared or long-lived environment's data; seeds run only against local or disposable databases, such as a per-branch preview.
 
 ## Tests
 
 One home; `to-spec` and `review` link here. A testing policy stated in the project's `ARCHITECTURE.md` overrides this default.
 
-- **Contracts are test-first.** When the change adds or changes a contract (an API route, an MCP tool, or the domain function behind them), write its focused check first, run only that check and see it fail, then implement until it passes. The check covers what a caller depends on: input, result, the errors an agent can act on, and permissions; one check per behavior, not per function.
+- **Contracts are test-first.** When the change adds or changes a contract (an API route, an MCP tool, or the domain function behind them), write its focused check first, run only that check and see it fail, then implement until it passes. The check covers what a caller depends on: input, result, the errors an agent can act on, and permissions; one check per behavior, not per function. When several adapters (an API route, an MCP tool, an agent tool) expose one behavior, test the behavior once at the domain function and each adapter only for agreement with it: the same result, errors, permissions, and, where the behavior emits them, events.
 - **Other behavior** gets a focused check that fails without the change, written in any order. Internals behind a contract get no separate tests unless their logic is the risk.
 - **No UI tests by default.** Verify UI in the running app: the local dev server, or a preview deployed on request. Add a UI or end-to-end test only when the user or spec asks, or when the same UI regression returns.
 - **Focused, then full once.** While working, including the first failing run, run only the focused check (its file or test name, with the project's one-file command), never the full suite; the full suite runs once, in Verify.

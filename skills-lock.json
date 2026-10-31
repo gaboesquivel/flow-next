@@ -29,7 +29,7 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/build/SKILL.md",
-      "computedHash": "38b3df0af27a32a802f3d8f09fe49b5c9f4db19d20798bbd8dc428d754c3cf9f"
+      "computedHash": "b9eb50c82b94cc381ba0e16c570876d261668a5c87ed0699ca9b3d5cda4ae15b"
     },
     "building-components": {
       "source": "vercel/components.build",
@@ -173,7 +173,7 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/review/SKILL.md",
-      "computedHash": "93f146ad15d0b8544c2723f05bb098102ea34653deab2b3f3b811a5548e9d7b2"
+      "computedHash": "190ada2d8f16ba9d3a4f9156012d51df1192cc3b236cb0d707cfd6cdd70093a3"
     },
     "shadcn": {
       "source": "shadcn/ui",
@@ -192,12 +192,6 @@
       "sourceType": "github",
       "skillPath": "skills/start/SKILL.md",
       "computedHash": "f0ac95607a53845cad87b3e219d6506caf5ab740ca4864c2831b755f9fe6e521"
-    },
-    "test-driven-development": {
-      "source": "addyosmani/agent-skills",
-      "sourceType": "github",
-      "skillPath": "skills/test-driven-development/SKILL.md",
-      "computedHash": "3685f4d68f60c5fe97674a069bf589e6723e5196961fca68a26d40b319a4841d"
     },
     "tldr": {
       "source": "gaboesquivel/flow-skills",
@@ -257,7 +251,7 @@
       "source": "gaboesquivel/flow-skills",
       "sourceType": "github",
       "skillPath": "skills/write-agents/SKILL.md",
-      "computedHash": "bb5370377de6e3c1f3e0eef269ed6968360c7a5904014eb1d3f9ae1cf6fdf764"
+      "computedHash": "b97cea3aae2c542cc855640384cda1769220234a61f572fadd152257b4962c74"
     },
     "write-humans": {
       "source": "gaboesquivel/flow-skills",
