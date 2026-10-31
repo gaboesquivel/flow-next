@@ -30,6 +30,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm security:check
       - run: pnpm qa
-      - run: pnpm eval:offline
+      # Evals run on demand only (`pnpm eval`), never in CI.
       # test already built the MCP App bundle; build only the Next.js app.
       - run: pnpm exec next build --webpack
