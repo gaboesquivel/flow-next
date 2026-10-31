@@ -23,4 +23,4 @@ pnpm skills:install   # restore skills from the lock (pnpm setup runs it when .a
 
 **Runtime and UI:** `ai-sdk`, `eve`, `typesafe-ai`, `nextjs`, `next-dev-loop`, `shadcn`, `building-components`, `nuqs`, `portless`, `vercel-cli`, `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`
 
-**MCP and testing:** `mcp-builder`, `agent-browser`, `vitest`, `playwright`, `test-driven-development`
+**MCP and testing:** `mcp-builder`, `agent-browser`, `vitest`, `playwright`. Testing policy is Flow's: contracts are tested first and UI is checked in the preview (`build` Tests), so the bundle carries no TDD skill.
