@@ -27,3 +27,9 @@ playwright-report
 
 # eve build output (pnpm build:agents)
 .output/
+
+# Agent hosts: shared config is committed, per-machine state is not
+.claude/worktrees/
+.claude/settings.local.json
+.cursor/*
+!.cursor/cli.json
