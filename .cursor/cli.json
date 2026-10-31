@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(gh:pr view *)",
+      "Shell(gh:pr checks *)",
+      "Shell(gh:pr create *)",
+      "Shell(gh:pr edit *)",
+      "Shell(gh:pr merge *)",
+      "Shell(gh:run view *)",
+      "Shell(gh:run watch *)",
+      "Shell(vercel:ls *)",
+      "Shell(vercel:inspect *)",
+      "Shell(vercel:logs *)",
+      "Shell(vercel:env ls *)",
+      "Shell(vercel:env pull *)",
+      "Shell(pnpm:qa)",
+      "Shell(pnpm:check-types)",
+      "Shell(pnpm:lint)",
+      "Shell(pnpm:lint *)",
+      "Shell(pnpm:test)",
+      "Shell(pnpm:test *)"
+    ],
+    "deny": []
+  }
+}
