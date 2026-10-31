@@ -5,6 +5,7 @@
       "Shell(gh:pr checks *)",
       "Shell(gh:pr create *)",
       "Shell(gh:pr edit *)",
+      "Shell(gh:pr ready *)",
       "Shell(gh:pr merge *)",
       "Shell(gh:run view *)",
       "Shell(gh:run watch *)",

@@ -5,6 +5,7 @@
       "Bash(gh pr checks *)",
       "Bash(gh pr create *)",
       "Bash(gh pr edit *)",
+      "Bash(gh pr ready *)",
       "Bash(gh pr merge *)",
       "Bash(gh run view *)",
       "Bash(gh run watch *)",
@@ -25,6 +26,18 @@
       "Bash(vercel env rm *)",
       "Bash(vercel remove *)",
       "Bash(pnpm db:migrate)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$CLAUDE_CODE_REMOTE\" = \"true\" ] && pnpm install --frozen-lockfile || true"
+          }
+        ]
+      }
     ]
   }
 }

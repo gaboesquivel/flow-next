@@ -33,3 +33,4 @@ playwright-report
 !.claude/settings.local.json
 .cursor/*
 !.cursor/cli.json
+!.cursor/environment.json

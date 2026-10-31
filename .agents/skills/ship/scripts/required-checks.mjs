@@ -25,6 +25,12 @@ const all = (api, path, key) => {
 
 // A check run's or workflow run's state: success only when completed with conclusion success.
 const runState = (r) => (r.status !== 'completed' ? 'pending' : r.conclusion ?? 'pending')
+// The latest result among runs for one check or workflow: highest id, except that a skipped run never hides a real one.
+// A draft event and the ready event can fire together, and the skipped draft run may get the higher id.
+const latest = (list) => {
+  const newest = [...list].sort((a, b) => b.id - a.id)
+  return newest.find((r) => !(r.status === 'completed' && r.conclusion === 'skipped')) ?? newest[0]
+}
 // A commit status's state, in check-run terms.
 const statusState = (s) => (s.state === 'error' ? 'failure' : s.state)
 
@@ -44,7 +50,7 @@ export function evaluate({ api, repo, number }) {
   const statuses = read(api, `repos/${repo}/commits/${head}/statuses?per_page=${PAGE}`)
   // Latest result for a context on this head, from the app the rule names when it names one: highest check-run id, else newest status.
   const resultFor = ({ context, integration_id: app }) => {
-    const run = runs.filter((r) => r.name === context && (app == null || r.app?.id === app)).sort((a, b) => b.id - a.id)[0]
+    const run = latest(runs.filter((r) => r.name === context && (app == null || r.app?.id === app)))
     if (run) return runState(run)
     const status = statuses.find((s) => s.context === context)
     return status ? statusState(status) : 'missing'
@@ -59,9 +65,8 @@ export function evaluate({ api, repo, number }) {
     // Without protection, judge each workflow by its latest run on the head (a skipped or failed-to-start run never passes,
     // and a skipped matrix job's renamed check cannot hide it), plus every check from other apps and every status.
     reasons.push(`no active protection on ${pr.base.ref}: every workflow and check on the head is treated as required`)
-    const latestByWorkflow = new Map()
-    for (const w of all(api, `repos/${repo}/actions/runs?head_sha=${head}`, 'workflow_runs').sort((a, b) => a.id - b.id)) latestByWorkflow.set(w.path ?? w.name, w)
-    checks = [...latestByWorkflow.values()].map((w) => ({ context: `workflow ${w.name}`, state: runState(w) }))
+    const byWorkflow = Map.groupBy(all(api, `repos/${repo}/actions/runs?head_sha=${head}`, 'workflow_runs'), (w) => w.path ?? w.name)
+    checks = [...byWorkflow.values()].map((list) => latest(list)).map((w) => ({ context: `workflow ${w.name}`, state: runState(w) }))
     const others = [...new Set(runs.filter((r) => r.app?.slug !== 'github-actions').map((r) => r.name))]
     checks.push(...others.map((context) => ({ context, state: resultFor({ context }) })))
     checks.push(...[...new Set(statuses.map((s) => s.context))].map((context) => ({ context, state: resultFor({ context }) })))
