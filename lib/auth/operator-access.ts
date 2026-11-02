@@ -4,12 +4,20 @@ export const OPERATOR_SESSION_COOKIE = "flow_operator_session";
 
 /** Canonical: `OPERATOR_SECRET`. `OPERATOR_ACCESS_TOKEN` is accepted for older env files. */
 export const getOperatorAccessToken = () =>
-  process.env.OPERATOR_SECRET?.trim() ?? process.env.OPERATOR_ACCESS_TOKEN?.trim() ?? "";
+  process.env.OPERATOR_SECRET?.trim() || process.env.OPERATOR_ACCESS_TOKEN?.trim() || "";
 
 export const isOperatorAccessConfigured = () => getOperatorAccessToken().length >= 16;
 
 export const signOperatorSession = ({ token }: { token: string }) =>
   createHmac("sha256", token).update("flow-template-operator-v1").digest("hex");
+
+/** Timing-safe check of a submitted operator token against the configured one. */
+export const matchesOperatorToken = (token: string) => safeEqual(token, getOperatorAccessToken());
+
+/** Timing-safe check of an operator session cookie value. */
+export const isValidOperatorSession = (session?: string) =>
+  Boolean(session) &&
+  safeEqual(session as string, signOperatorSession({ token: getOperatorAccessToken() }));
 
 export const readOperatorSessionCookie = (request: Request) => {
   const cookieHeader = request.headers.get("cookie") ?? "";
@@ -30,20 +38,17 @@ const readBearerToken = (request: Request) => {
 export const verifyOperatorRequest = (request: Request) => {
   if (!isOperatorAccessConfigured()) return { ok: false as const, reason: "disabled" as const };
 
-  const configured = getOperatorAccessToken();
   const bearer = readBearerToken(request);
   const headerSecret = request.headers.get("x-operator-secret")?.trim();
   const token = bearer ?? headerSecret ?? "";
 
   if (token) {
-    if (!safeEqual(token, configured))
+    if (!matchesOperatorToken(token))
       return { ok: false as const, reason: "unauthorized" as const };
     return { ok: true as const };
   }
 
-  const session = readOperatorSessionCookie(request);
-  const expected = signOperatorSession({ token: configured });
-  if (!session || !safeEqual(session, expected))
+  if (!isValidOperatorSession(readOperatorSessionCookie(request)))
     return { ok: false as const, reason: "unauthorized" as const };
 
   return { ok: true as const };

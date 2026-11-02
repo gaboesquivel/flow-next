@@ -9,7 +9,15 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    exclude: ["node_modules/**", ".agents/**", ".next/**", ".eve/**", "mcp-app/**"],
+    exclude: [
+      "node_modules/**",
+      ".agents/**",
+      ".claude/**",
+      ".worktrees/**",
+      ".next/**",
+      ".eve/**",
+      "mcp-app/**",
+    ],
     include: ["**/*.test.ts"],
     pool: "forks",
   },

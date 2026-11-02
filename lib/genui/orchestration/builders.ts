@@ -10,6 +10,24 @@ import {
 import type { CompositeName } from "../registry/composites";
 import { chooseCollectionComposite } from "../registry/composites";
 
+const envelope = ({
+  fallbackText,
+  records,
+  requestId,
+  root,
+}: {
+  fallbackText: string;
+  records: GroundedRecord[];
+  requestId: string;
+  root: string;
+}): CompositionEnvelope => ({
+  fallbackText,
+  libraryVersion: GENUI_LIBRARY_VERSION,
+  openuiText: `root = ${root}`,
+  records,
+  requestId,
+});
+
 export const answerDocument = ({
   body,
   records,
@@ -20,13 +38,13 @@ export const answerDocument = ({
   records: GroundedRecord[];
   requestId: string;
   sourceIds?: string[];
-}) => ({
-  fallbackText: body,
-  libraryVersion: GENUI_LIBRARY_VERSION,
-  openuiText: `root = Answer(${openUiStringLiteral(body)}, ${openUiStringList(sourceIds)})`,
-  records,
-  requestId,
-});
+}) =>
+  envelope({
+    fallbackText: body,
+    records,
+    requestId,
+    root: `Answer(${openUiStringLiteral(body)}, ${openUiStringList(sourceIds)})`,
+  });
 
 export const collectionDocument = ({
   composite,
@@ -40,13 +58,12 @@ export const collectionDocument = ({
   requestId: string;
 }) => {
   const layout = composite ?? chooseCollectionComposite({ entityIds });
-  return {
+  return envelope({
     fallbackText: `Showing ${entityIds.length} items.`,
-    libraryVersion: GENUI_LIBRARY_VERSION,
-    openuiText: `root = CollectionGrid(${openUiStringLiteral(layout)}, ${openUiStringList(entityIds)})`,
     records,
     requestId,
-  } satisfies CompositionEnvelope;
+    root: `CollectionGrid(${openUiStringLiteral(layout)}, ${openUiStringList(entityIds)})`,
+  });
 };
 
 export const comparisonDocument = ({
@@ -59,13 +76,13 @@ export const comparisonDocument = ({
   entityIds: string[];
   records: GroundedRecord[];
   requestId: string;
-}) => ({
-  fallbackText: `Comparing ${entityIds.length} items.`,
-  libraryVersion: GENUI_LIBRARY_VERSION,
-  openuiText: `root = ComparisonView("side-by-side", ${openUiStringLiteral(dimension ?? "")}, ${openUiStringList(entityIds)})`,
-  records,
-  requestId,
-});
+}) =>
+  envelope({
+    fallbackText: `Comparing ${entityIds.length} items.`,
+    records,
+    requestId,
+    root: `ComparisonView("side-by-side", ${openUiStringLiteral(dimension ?? "")}, ${openUiStringList(entityIds)})`,
+  });
 
 export const dataExplorerDocument = ({
   metricIds,
@@ -75,13 +92,13 @@ export const dataExplorerDocument = ({
   metricIds: string[];
   records: GroundedRecord[];
   requestId: string;
-}) => ({
-  fallbackText: "Metrics overview.",
-  libraryVersion: GENUI_LIBRARY_VERSION,
-  openuiText: `root = DataExplorer("metrics-dashboard", ${openUiStringList(metricIds)})`,
-  records,
-  requestId,
-});
+}) =>
+  envelope({
+    fallbackText: "Metrics overview.",
+    records,
+    requestId,
+    root: `DataExplorer("metrics-dashboard", ${openUiStringList(metricIds)})`,
+  });
 
 export const timelineDocument = ({
   orderedIds,
@@ -91,13 +108,13 @@ export const timelineDocument = ({
   orderedIds: string[];
   records: GroundedRecord[];
   requestId: string;
-}) => ({
-  fallbackText: "Timeline.",
-  libraryVersion: GENUI_LIBRARY_VERSION,
-  openuiText: `root = TimelineView("timeline-vertical", ${openUiStringList(orderedIds)})`,
-  records,
-  requestId,
-});
+}) =>
+  envelope({
+    fallbackText: "Timeline.",
+    records,
+    requestId,
+    root: `TimelineView("timeline-vertical", ${openUiStringList(orderedIds)})`,
+  });
 
 export const sectionStackDocument = ({
   childExpressions,
@@ -107,13 +124,13 @@ export const sectionStackDocument = ({
   childExpressions: string[];
   records: GroundedRecord[];
   requestId: string;
-}) => ({
-  fallbackText: "Multiple sections.",
-  libraryVersion: GENUI_LIBRARY_VERSION,
-  openuiText: `root = SectionStack([${childExpressions.join(", ")}])`,
-  records,
-  requestId,
-});
+}) =>
+  envelope({
+    fallbackText: "Multiple sections.",
+    records,
+    requestId,
+    root: `SectionStack([${childExpressions.join(", ")}])`,
+  });
 
 export const onboardingFormDocument = ({ requestId }: { requestId: string }) => {
   const records = onboardingFormRecords;
@@ -156,10 +173,10 @@ export const statusDocument = ({
   records: GroundedRecord[];
   requestId: string;
   variant: "loading" | "empty" | "warning" | "error";
-}) => ({
-  fallbackText: message,
-  libraryVersion: GENUI_LIBRARY_VERSION,
-  openuiText: `root = StatusMessage(${openUiStringLiteral(message)}, ${openUiStringLiteral(variant)})`,
-  records,
-  requestId,
-});
+}) =>
+  envelope({
+    fallbackText: message,
+    records,
+    requestId,
+    root: `StatusMessage(${openUiStringLiteral(message)}, ${openUiStringLiteral(variant)})`,
+  });

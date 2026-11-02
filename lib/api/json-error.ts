@@ -1,5 +1,3 @@
-import { mergeResponseHeaders } from "@/lib/api/rate-limit-headers";
-
 export const jsonError = ({
   code,
   message,
@@ -33,6 +31,3 @@ export const jsonError = ({
     { headers, status },
   );
 };
-
-export const withExtraHeaders = (response: Response, extraHeaders?: Record<string, string>) =>
-  extraHeaders ? mergeResponseHeaders(response, extraHeaders) : response;

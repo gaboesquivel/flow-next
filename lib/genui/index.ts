@@ -44,7 +44,6 @@ export {
 } from "./orchestration/builders";
 export { publishComposition } from "./orchestration/compose";
 export { openUiStringList, openUiStringLiteral } from "./contract/openui-text";
-export { synthesizeOpenEndedAnswer } from "./orchestration/model";
 export {
   refineOpenUiComposition,
   synthesizeOpenUiComposition,
@@ -53,10 +52,6 @@ export {
 export { getFormSchema } from "./fixtures/form-schemas";
 export { onboardingFormRecords } from "./fixtures/synthetic-onboarding";
 export { supportDashboardRecords } from "./fixtures/synthetic-support";
-export {
-  consumeNdjsonResponse,
-  parseNdjsonText,
-  type ComposeStreamEvent,
-} from "./orchestration/stream";
+export { consumeNdjsonResponse, type ComposeStreamEvent } from "./orchestration/stream";
 export { acmeCatalogRecords } from "./fixtures/acme-catalog";
 export { MAX_QUERY_CODE_POINTS } from "./core/limits";

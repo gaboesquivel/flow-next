@@ -1,13 +1,7 @@
 import { registerAppTool } from "@modelcontextprotocol/ext-apps/server";
 import type { McpServer } from "@modelcontextprotocol/server";
-import type { CompositionEnvelope } from "@/lib/genui";
-import {
-  componentNames,
-  composeQueryToEnvelope,
-  compositionGuidance,
-  GENUI_LIBRARY_VERSION,
-  MAX_QUERY_CODE_POINTS,
-} from "@/lib/genui";
+import { componentNames, compositionGuidance, GENUI_LIBRARY_VERSION } from "@/lib/genui";
+import { composeToolInputShape, runComposeTool } from "@/lib/genui/compose-tool";
 import { z } from "zod";
 
 import { GENUI_PREVIEW_RESOURCE_URI } from "./genui-preview-resource";
@@ -52,52 +46,9 @@ export const registerStarterMcpTools = (server: McpServer) => {
     {
       description:
         "Generate a validated OpenUI composition from a natural-language UI request using synthetic data.",
-      inputSchema: {
-        mode: z.enum(["create", "refine"]).optional(),
-        priorEnvelope: z
-          .object({
-            fallbackText: z.string(),
-            libraryVersion: z.literal(GENUI_LIBRARY_VERSION),
-            openuiText: z.string(),
-            records: z.array(z.record(z.string(), z.unknown())),
-            requestId: z.string(),
-          })
-          .optional(),
-        query: z.string().min(1).max(MAX_QUERY_CODE_POINTS),
-        turns: z
-          .array(
-            z.object({
-              content: z.string(),
-              role: z.enum(["assistant", "user"]),
-            }),
-          )
-          .max(12)
-          .optional(),
-      },
+      inputSchema: composeToolInputShape(z.literal(GENUI_LIBRARY_VERSION)),
       ...previewToolMeta,
     },
-    async ({ mode, priorEnvelope, query, turns }) => {
-      const clientRequestId = `mcp-${Date.now()}`;
-      const { envelope, result } = await composeQueryToEnvelope({
-        input: {
-          clientRequestId,
-          mode,
-          priorEnvelope: priorEnvelope as CompositionEnvelope | undefined,
-          query,
-          turns,
-          version: 1,
-        },
-      });
-      if (!envelope || result.metadata.outcome !== "success")
-        return asToolResult({
-          error: "composition_failed",
-          failureCode: result.metadata.failureCode,
-          validationOk: result.metadata.validationOk,
-        });
-      return asToolResult({
-        envelope,
-        metadata: result.metadata,
-      });
-    },
+    async (args) => asToolResult(await runComposeTool("mcp", args)),
   );
 };

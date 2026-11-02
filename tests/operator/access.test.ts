@@ -1,22 +1,28 @@
 import assert from "node:assert/strict";
-import { test } from "vitest";
+import { afterEach, test, vi } from "vitest";
 
 import { POST as postSession } from "../../app/api/operator/session/route";
+import { getOperatorAccessToken } from "../../lib/auth/operator-access";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 test("operator session POST fails closed without OPERATOR_SECRET", async () => {
-  const previous = process.env.OPERATOR_SECRET;
-  delete process.env.OPERATOR_SECRET;
-  delete process.env.OPERATOR_ACCESS_TOKEN;
-  try {
-    const response = await postSession(
-      new Request("http://flow-next.localhost/api/operator/session", {
-        body: JSON.stringify({ token: "anything" }),
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-      }),
-    );
-    assert.equal(response.status, 503);
-  } finally {
-    if (previous !== undefined) process.env.OPERATOR_SECRET = previous;
-  }
+  vi.stubEnv("OPERATOR_SECRET", undefined);
+  vi.stubEnv("OPERATOR_ACCESS_TOKEN", undefined);
+  const response = await postSession(
+    new Request("http://flow-next.localhost/api/operator/session", {
+      body: JSON.stringify({ token: "anything" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    }),
+  );
+  assert.equal(response.status, 503);
+});
+
+test("an empty OPERATOR_SECRET falls back to OPERATOR_ACCESS_TOKEN", () => {
+  vi.stubEnv("OPERATOR_SECRET", "  ");
+  vi.stubEnv("OPERATOR_ACCESS_TOKEN", "legacy-token-0123456789");
+  assert.equal(getOperatorAccessToken(), "legacy-token-0123456789");
 });

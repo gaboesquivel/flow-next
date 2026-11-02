@@ -1,11 +1,14 @@
 import type { TypeSafeClient } from "@typesafe-ai/sdk";
 
+import type { z } from "zod";
+
 import type { CompositionTier } from "../core/tiers";
 import { JEV_CONFIDENCE_THRESHOLD } from "../core/tiers";
 import type { ControlledIntent, RoutedIntent } from "./routing";
 import { ambiguousQueryTier } from "./routing";
+import type { composeClassifierSchema } from "./stream-schema";
 
-export type ComposeClassifier = "jev" | "regex";
+export type ComposeClassifier = z.infer<typeof composeClassifierSchema>;
 
 export type AmbiguousClassification =
   | {
@@ -23,19 +26,25 @@ export type AmbiguousClassification =
       failure: "classification_failed";
     };
 
+/** Jev choices for ambiguous queries; every key other than `open` and `unsupported` is a controlled intent. */
+const intentChoices = {
+  "compare-plans": "Compare subscription or product plans",
+  "list-products": "List or browse catalog entities",
+  "onboarding-form": "Collect new user information in a form",
+  open: "Open-ended or novel layout requiring generation",
+  "product-timeline": "Show a chronological product timeline",
+  "search-products": "Search or filter catalog items",
+  "show-metrics": "Show metrics, revenue, or dashboard charts",
+  "support-dashboard": "Customer support or help desk dashboard",
+  unsupported: "Request is outside the registered component catalog",
+} satisfies Partial<Record<ControlledIntent | "open" | "unsupported", string>>;
+
+const intentChoiceIds = Object.keys(intentChoices);
+
 const jevIntentFromChoice = (choiceId: string): ControlledIntent | "open" | null => {
   if (choiceId === "open") return "open";
   if (choiceId === "unsupported") return "insufficient-data";
-  const intents: ControlledIntent[] = [
-    "compare-plans",
-    "show-metrics",
-    "support-dashboard",
-    "onboarding-form",
-    "product-timeline",
-    "search-products",
-    "list-products",
-  ];
-  return intents.includes(choiceId as ControlledIntent) ? (choiceId as ControlledIntent) : null;
+  return intentChoiceIds.includes(choiceId) ? (choiceId as ControlledIntent) : null;
 };
 
 const regexFallback = ({ routed }: { routed: RoutedIntent }): AmbiguousClassification => ({
@@ -80,17 +89,7 @@ const defaultJevClassifier = async (query: string): Promise<AmbiguousClassificat
   const client = await getJevClient();
   const response = await client.systemOne({
     questions: {
-      intent: choice("Which starter experience best matches this UI request?", {
-        "compare-plans": "Compare subscription or product plans",
-        "list-products": "List or browse catalog entities",
-        "onboarding-form": "Collect new user information in a form",
-        open: "Open-ended or novel layout requiring generation",
-        "product-timeline": "Show a chronological product timeline",
-        "search-products": "Search or filter catalog items",
-        "show-metrics": "Show metrics, revenue, or dashboard charts",
-        "support-dashboard": "Customer support or help desk dashboard",
-        unsupported: "Request is outside the registered component catalog",
-      }),
+      intent: choice("Which starter experience best matches this UI request?", intentChoices),
     },
     state: query,
   });

@@ -1,10 +1,10 @@
 import { execSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { repoRoot as root } from "../lib/repo-paths.mjs";
 import { applyDataPreset, readDatabaseUrl, upsertEnvLine } from "./data-preset.mjs";
 import { removeStaleHooks } from "./stale-hooks.mjs";
 
-const root = path.resolve(import.meta.dirname, "../..");
 const envExample = path.join(root, ".env.example");
 const envLocal = path.join(root, ".env.local");
 
@@ -43,8 +43,7 @@ try {
 if (!existsSync(path.join(root, ".agents/skills")))
   execSync("pnpm skills:install", { cwd: root, stdio: "inherit" });
 
-const envFile = path.join(root, ".env.local");
-const envText = existsSync(envFile) ? readFileSync(envFile, "utf-8") : "";
+const envText = existsSync(envLocal) ? readFileSync(envLocal, "utf-8") : "";
 const linkFile = path.join(root, ".vercel/project.json");
 const link = existsSync(linkFile) ? JSON.parse(readFileSync(linkFile, "utf-8")) : {};
 const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf-8"));
@@ -65,10 +64,10 @@ if (!preset.ok) {
 if (preset.databaseUrl) {
   const next = upsertEnvLine({
     key: "DATABASE_URL",
-    text: existsSync(envFile) ? readFileSync(envFile, "utf-8") : envText,
+    text: envText,
     value: preset.databaseUrl,
   });
-  if (next.changed) writeFileSync(envFile, next.text);
+  if (next.changed) writeFileSync(envLocal, next.text);
 }
 if (preset.vercel) {
   mkdirSync(path.dirname(linkFile), { recursive: true });

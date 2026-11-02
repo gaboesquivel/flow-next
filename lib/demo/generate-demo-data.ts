@@ -30,11 +30,9 @@ const buildUsers = ({ rows, seed }: { rows: number; seed: number }) => {
 };
 
 const buildSupportTickets = ({ rows, seed }: { rows: number; seed: number }) => {
-  faker.seed(seed + 1);
-  faker.setDefaultRefDate(REFERENCE_DATE);
   const users = buildUsers({ rows: Math.min(rows, 5), seed });
   return Array.from({ length: rows }, (_, index) => ({
-    assigneeId: users[index % users.length]?.id ?? `user_${seed}_0`,
+    assigneeId: `user_${seed}_${index % users.length}`,
     id: `ticket_${seed}_${index}`,
     priority: faker.helpers.arrayElement(["low", "medium", "high"]),
     status: faker.helpers.arrayElement(["open", "pending", "resolved"]),
@@ -43,12 +41,10 @@ const buildSupportTickets = ({ rows, seed }: { rows: number; seed: number }) => 
 };
 
 const buildOrders = ({ rows, seed }: { rows: number; seed: number }) => {
-  faker.seed(seed + 2);
-  faker.setDefaultRefDate(REFERENCE_DATE);
   const users = buildUsers({ rows: Math.min(rows, 5), seed });
   return Array.from({ length: rows }, (_, index) => ({
     amountUsd: faker.number.float({ fractionDigits: 2, max: 500, min: 12 }),
-    customerId: users[index % users.length]?.id ?? `user_${seed}_0`,
+    customerId: `user_${seed}_${index % users.length}`,
     id: `order_${seed}_${index}`,
     placedAt: faker.date.recent({ days: 14, refDate: REFERENCE_DATE }).toISOString(),
     status: faker.helpers.arrayElement(["processing", "shipped", "delivered"]),

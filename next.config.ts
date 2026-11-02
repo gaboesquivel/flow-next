@@ -4,6 +4,9 @@ import type { NextConfig } from "next";
 /** Markdown negotiation when Accept asks for markdown and does not list text/html. */
 const markdownAcceptPattern = "^(?!.*text/html).*text/markdown";
 
+/** MCP App bundle that MCP routes serve as the GenUI preview resource. */
+const genuiPreview = "./mcp-app/dist/genui-preview.html";
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["flow-next.localhost", "*.flow-next.localhost"],
   experimental: {
@@ -20,9 +23,9 @@ const nextConfig: NextConfig = {
     ];
   },
   outputFileTracingIncludes: {
-    "/api/mcp": ["./mcp-app/dist/genui-preview.html"],
-    "/api/mcp/operator": ["./mcp-app/dist/genui-preview.html"],
-    "/mcp": ["./mcp-app/dist/genui-preview.html"],
+    "/api/mcp": [genuiPreview],
+    "/api/mcp/operator": [genuiPreview],
+    "/mcp": [genuiPreview],
   },
   redirects() {
     return [{ destination: "/dev", permanent: false, source: "/developers" }];

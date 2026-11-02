@@ -1,6 +1,9 @@
+import { RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
+
 import { GENUI_PREVIEW_RESOURCE_URI } from "./genui-preview-resource";
 
-const starterMcpAppResourceUri = GENUI_PREVIEW_RESOURCE_URI;
+/** Public MCP server identity, shared by the server factory and discovery documents. */
+export const starterMcpServerInfo = { name: "flow-next", version: "1.0.0" } as const;
 
 export interface StarterMcpToolCard {
   description: string;
@@ -28,14 +31,14 @@ export const buildMcpServerCard = (origin: string) => ({
   resources: [
     {
       description: "GenUI Preview MCP App",
-      mimeType: "text/html;profile=mcp-app",
-      uri: starterMcpAppResourceUri,
+      mimeType: RESOURCE_MIME_TYPE,
+      uri: GENUI_PREVIEW_RESOURCE_URI,
     },
   ],
   serverInfo: {
-    name: "flow-next",
+    name: starterMcpServerInfo.name,
     title: "Flow Next MCP",
-    version: "1.0.0",
+    version: starterMcpServerInfo.version,
   },
   tools: starterMcpToolCatalog,
   transport: {
@@ -47,7 +50,7 @@ export const buildMcpServerCard = (origin: string) => ({
 
 export const buildMcpRegistryManifest = (origin: string) => ({
   mcpServers: {
-    "flow-next": {
+    [starterMcpServerInfo.name]: {
       transport: {
         type: "http",
         url: `${origin}/api/mcp`,
@@ -61,7 +64,7 @@ export const buildAiCatalog = (origin: string) => ({
   servers: [
     {
       description: "Flow Next MCP — GenUI compose and catalog tools.",
-      name: "flow-next",
+      name: starterMcpServerInfo.name,
       transport: {
         type: "streamable-http",
         url: `${origin}/api/mcp`,

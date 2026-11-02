@@ -1,9 +1,11 @@
+import { MAX_QUERY_CODE_POINTS } from "@/lib/genui/core/limits";
+
 const toolPaths = {
   compose_ui: {
     operationId: "composeUi",
     requestBody: {
       properties: {
-        query: { maxLength: 2000, minLength: 1, type: "string" },
+        query: { maxLength: MAX_QUERY_CODE_POINTS, minLength: 1, type: "string" },
       },
       required: ["query"],
       type: "object",
@@ -52,6 +54,13 @@ const errorJsonContent = {
   },
 };
 
+const rateLimitHeaderRefs = {
+  "RateLimit-Limit": { $ref: "#/components/headers/RateLimitLimit" },
+  "RateLimit-Policy": { $ref: "#/components/headers/RateLimitPolicy" },
+  "RateLimit-Remaining": { $ref: "#/components/headers/RateLimitRemaining" },
+  "RateLimit-Reset": { $ref: "#/components/headers/RateLimitReset" },
+};
+
 const openApiComponents = {
   headers: {
     RateLimitLimit: {
@@ -95,12 +104,7 @@ const openApiComponents = {
       content: errorJsonContent,
       description: "Rate limit exceeded",
       headers: {
-        "RateLimit-Limit": { $ref: "#/components/headers/RateLimitLimit" },
-        "RateLimit-Policy": { $ref: "#/components/headers/RateLimitPolicy" },
-        "RateLimit-Remaining": {
-          $ref: "#/components/headers/RateLimitRemaining",
-        },
-        "RateLimit-Reset": { $ref: "#/components/headers/RateLimitReset" },
+        ...rateLimitHeaderRefs,
         "Retry-After": { $ref: "#/components/headers/RetryAfter" },
       },
     },
@@ -164,14 +168,7 @@ const mcpOperation = {
     "200": {
       content: { "application/json": { schema: { type: "object" } } },
       description: "MCP JSON-RPC response",
-      headers: {
-        "RateLimit-Limit": { $ref: "#/components/headers/RateLimitLimit" },
-        "RateLimit-Policy": { $ref: "#/components/headers/RateLimitPolicy" },
-        "RateLimit-Remaining": {
-          $ref: "#/components/headers/RateLimitRemaining",
-        },
-        "RateLimit-Reset": { $ref: "#/components/headers/RateLimitReset" },
-      },
+      headers: rateLimitHeaderRefs,
     },
     "406": { $ref: "#/components/responses/NotAcceptable" },
     "429": { $ref: "#/components/responses/RateLimited" },
@@ -229,7 +226,7 @@ const genuiOperation = {
         schema: {
           properties: {
             clientRequestId: { minLength: 1, type: "string" },
-            query: { maxLength: 2000, minLength: 1, type: "string" },
+            query: { maxLength: MAX_QUERY_CODE_POINTS, minLength: 1, type: "string" },
             version: { minimum: 1, type: "integer" },
           },
           required: ["clientRequestId", "query", "version"],
@@ -258,8 +255,8 @@ const genuiOperation = {
 
 const versioningDescription = `API versioning (v1): Prefer X-API-Version: v1 or /v1/api/* aliases. Demo starter: no authentication on MCP/HTTP surfaces.`;
 
-export const buildOpenApiDocument = (origin: string) => {
-  const paths = {
+const paths = Object.fromEntries(
+  Object.entries({
     "/api/chat": { post: chatOperation },
     "/api/genui/compose": { post: genuiOperation },
     "/api/mcp": { post: mcpOperation },
@@ -272,27 +269,27 @@ export const buildOpenApiDocument = (origin: string) => {
     "/v1/api/mcp": {
       post: { ...mcpOperation, operationId: "mcpStreamableHttpV1" },
     },
-  };
+  }).toSorted(([a], [b]) => a.localeCompare(b)),
+);
 
-  return {
-    components: openApiComponents,
-    externalDocs: {
-      description: "Developer portal",
-      url: `${origin}/dev`,
-    },
-    info: {
-      description: `${versioningDescription}\n\nAgentic application starter — MCP tools via POST /api/mcp; GenUI via POST /api/genui/compose.`,
-      title: "Flow Next API",
-      version: "1.0.0",
-      "x-api-version": "v1",
-    },
-    openapi: "3.1.0",
-    paths: Object.fromEntries(Object.entries(paths).toSorted(([a], [b]) => a.localeCompare(b))),
-    servers: [{ description: "Current v1 base URL", url: origin }],
-    tags: [
-      { description: "Streamable HTTP MCP", name: "mcp" },
-      { description: "GenUI NDJSON compose", name: "genui" },
-      { description: "Chat assistant", name: "chat" },
-    ],
-  };
-};
+export const buildOpenApiDocument = (origin: string) => ({
+  components: openApiComponents,
+  externalDocs: {
+    description: "Developer portal",
+    url: `${origin}/dev`,
+  },
+  info: {
+    description: `${versioningDescription}\n\nAgentic application starter — MCP tools via POST /api/mcp; GenUI via POST /api/genui/compose.`,
+    title: "Flow Next API",
+    version: "1.0.0",
+    "x-api-version": "v1",
+  },
+  openapi: "3.1.0",
+  paths,
+  servers: [{ description: "Current v1 base URL", url: origin }],
+  tags: [
+    { description: "Streamable HTTP MCP", name: "mcp" },
+    { description: "GenUI NDJSON compose", name: "genui" },
+    { description: "Chat assistant", name: "chat" },
+  ],
+});

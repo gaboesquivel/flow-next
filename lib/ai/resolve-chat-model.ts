@@ -1,10 +1,11 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { gateway } from "@ai-sdk/gateway";
 import type { LanguageModel } from "ai";
 
-import { chatModelId, directModelId, gatewayAvailable, gatewayModel } from "./models";
+import { chatModelId, directModelId, gatewayAvailable } from "./models";
 
 export const resolveChatModel = (): LanguageModel | null => {
-  if (gatewayAvailable()) return gatewayModel(chatModelId());
+  if (gatewayAvailable()) return gateway(chatModelId());
 
   const allowDirect = process.env.FLOW_ALLOW_DIRECT_ANTHROPIC?.trim() === "1";
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();

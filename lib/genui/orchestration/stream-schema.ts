@@ -4,11 +4,22 @@ import { validateCompositionEnvelope } from "../contract/compiler";
 import { GENUI_LIBRARY_VERSION } from "../core/envelope";
 import { groundedRecordSchema } from "../core/grounded-record-schema";
 import { GENUI_MAX_DOCUMENT_BYTES } from "../core/limits";
+import { compositionTierSchema } from "../core/tiers";
 import type { ComposeStreamEvent } from "./stream";
 
 export const NDJSON_MAX_LINE_BYTES = 128 * 1024;
 export const NDJSON_MAX_RESPONSE_BYTES = 512 * 1024;
 export const NDJSON_MAX_EVENTS = 32;
+
+export const composeClassifierSchema = z.enum(["jev", "regex"]);
+
+export const composeFailureCodeSchema = z.enum([
+  "classification_failed",
+  "generation_invalid",
+  "missing_credentials",
+  "unsupported_request",
+  "validation_failed",
+]);
 
 const requestId = z.string().min(1).max(128);
 const sequence = z.number().int().nonnegative();
@@ -33,21 +44,13 @@ const composeStreamEventSchema = z.discriminatedUnion("type", [
     envelope: envelopeSchema,
     metadata: z
       .strictObject({
-        classifier: z.enum(["jev", "regex"]).optional(),
+        classifier: composeClassifierSchema.optional(),
         component: z.string().optional(),
         composite: z.string().nullable().optional(),
-        failureCode: z
-          .enum([
-            "classification_failed",
-            "generation_invalid",
-            "missing_credentials",
-            "unsupported_request",
-            "validation_failed",
-          ])
-          .optional(),
+        failureCode: composeFailureCodeSchema.optional(),
         outcome: z.enum(["failed", "success"]),
         refined: z.boolean().optional(),
-        tier: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+        tier: compositionTierSchema,
         validationOk: z.boolean(),
       })
       .optional(),

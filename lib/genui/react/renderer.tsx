@@ -1,6 +1,7 @@
 "use client";
 
 import { Renderer } from "@openuidev/react-lang";
+import { useMemo } from "react";
 
 import { validateCompositionEnvelope } from "../contract/compiler";
 import type { CompositionEnvelope } from "../core/envelope";
@@ -16,7 +17,7 @@ export const GenuiRenderer = ({
   envelope: CompositionEnvelope;
   isStreaming?: boolean;
 }) => {
-  const validated = validateCompositionEnvelope({ envelope });
+  const validated = useMemo(() => validateCompositionEnvelope({ envelope }), [envelope]);
   if (!validated.ok)
     return <p role="alert">{envelope.fallbackText || "This composition could not be shown."}</p>;
 

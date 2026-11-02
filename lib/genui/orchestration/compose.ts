@@ -1,3 +1,5 @@
+import type { z } from "zod";
+
 import { gatewayAvailable } from "../../ai/models";
 import { validateCompositionEnvelope } from "../contract/compiler";
 import { openUiStringList, openUiStringLiteral } from "../contract/openui-text";
@@ -20,19 +22,15 @@ import type { ComposeClassifier } from "./classify";
 import { classifyAmbiguousQuery } from "./classify";
 import type { ComposeTurn } from "./generate-openui";
 import { refineOpenUiComposition, synthesizeOpenUiComposition } from "./generate-openui";
-import { defaultEntityIds, routeQuery } from "./routing";
+import { defaultEntityIds, isPlanComparison, routeQuery } from "./routing";
 import type { ComposeStreamEvent } from "./stream";
+import type { composeFailureCodeSchema } from "./stream-schema";
 
 export type ComposeMode = "create" | "refine";
 
 export type ComposeOutcome = "failed" | "success";
 
-export type ComposeFailureCode =
-  | "classification_failed"
-  | "generation_invalid"
-  | "missing_credentials"
-  | "unsupported_request"
-  | "validation_failed";
+export type ComposeFailureCode = z.infer<typeof composeFailureCodeSchema>;
 
 export interface ComposeInput {
   clientRequestId: string;
@@ -193,6 +191,28 @@ const tierThreeFailureEnvelope = ({
   });
 };
 
+/** Runs one tier-3 model call, or returns the status envelope for why it could not. */
+const runTierThree = async (
+  generate: () => Promise<CompositionEnvelope | null>,
+  requestId: string,
+) => {
+  const failed = (failureCode: ComposeFailureCode) => ({
+    envelope: tierThreeFailureEnvelope({ failureCode, requestId }),
+    failureCode,
+    modelCalls: 0,
+    outcome: "failed" as ComposeOutcome,
+  });
+  if (!gatewayAvailable()) return failed("missing_credentials");
+  const generated = await generate();
+  if (!generated) return failed("generation_invalid");
+  return {
+    envelope: generated,
+    failureCode: undefined,
+    modelCalls: 1,
+    outcome: "success" as ComposeOutcome,
+  };
+};
+
 const declarativeCompound = ({
   query,
   requestId,
@@ -205,9 +225,7 @@ const declarativeCompound = ({
     "Acme Analytics ships ingestion, dashboards, and mobile insights.",
   )}, ${openUiStringList(["document:api-overview"])})`;
   const wantsMetrics = /metric|revenue|chart/u.test(query.toLowerCase());
-  const normalized = query.toLowerCase();
-  const wantsCompare =
-    /compare|versus|vs\b/u.test(normalized) && /plan|orbit|nova/u.test(normalized);
+  const wantsCompare = isPlanComparison(query.toLowerCase());
   const children = [answerChild];
   if (wantsMetrics) {
     children.push(`DataExplorer("metrics-dashboard", ${openUiStringList(metricIds)})`);
@@ -247,7 +265,7 @@ const composeCreatePath = async ({
   const routed = routeQuery(query);
   let { intent, tier } = routed;
   let classifier: ComposeClassifier | undefined = intent ? "regex" : undefined;
-  let modelCalls = 0;
+  const modelCalls = 0;
   let outcome: ComposeOutcome = "success";
   let failureCode: ComposeFailureCode | undefined;
   let envelope: CompositionEnvelope | undefined;
@@ -301,28 +319,11 @@ const composeCreatePath = async ({
     return { classifier, envelope, failureCode, modelCalls, outcome, tier };
   }
 
-  tier = 3;
-  if (gatewayAvailable()) {
-    const generated = await synthesizeOpenUiComposition({
-      query,
-      requestId,
-      signal,
-    });
-    if (generated) {
-      modelCalls = 1;
-      envelope = generated;
-    } else {
-      failureCode = "generation_invalid";
-      outcome = "failed";
-      envelope = tierThreeFailureEnvelope({ failureCode, requestId });
-    }
-  } else {
-    failureCode = "missing_credentials";
-    outcome = "failed";
-    envelope = tierThreeFailureEnvelope({ failureCode, requestId });
-  }
-
-  return { classifier, envelope, failureCode, modelCalls, outcome, tier };
+  const generated = await runTierThree(
+    () => synthesizeOpenUiComposition({ query, requestId, signal }),
+    requestId,
+  );
+  return { classifier, ...generated, tier: 3 as CompositionTier };
 };
 
 export const composeQuery = async ({
@@ -370,29 +371,13 @@ export const composeQuery = async ({
   let refined = false;
 
   if (refining && input.priorEnvelope) {
+    const { priorEnvelope, turns } = input;
     tier = 3;
     refined = true;
-    if (gatewayAvailable()) {
-      const generated = await refineOpenUiComposition({
-        priorEnvelope: input.priorEnvelope,
-        query,
-        requestId,
-        signal,
-        turns: input.turns,
-      });
-      if (generated) {
-        modelCalls = 1;
-        envelope = generated;
-      } else {
-        failureCode = "generation_invalid";
-        outcome = "failed";
-        envelope = tierThreeFailureEnvelope({ failureCode, requestId });
-      }
-    } else {
-      failureCode = "missing_credentials";
-      outcome = "failed";
-      envelope = tierThreeFailureEnvelope({ failureCode, requestId });
-    }
+    ({ envelope, failureCode, modelCalls, outcome } = await runTierThree(
+      () => refineOpenUiComposition({ priorEnvelope, query, requestId, signal, turns }),
+      requestId,
+    ));
   } else {
     ({ classifier, envelope, failureCode, modelCalls, outcome, tier } = await composeCreatePath({
       query,
@@ -435,15 +420,12 @@ export const composeQuery = async ({
 
   return {
     events,
+    // Leading keys keep the metadata's serialized key order.
     metadata: {
       classifier,
       component: published.compiled.component,
       composite: published.compiled.composite,
-      failureCode,
-      outcome,
-      refined: refined || undefined,
-      tier,
-      validationOk: true,
+      ...resultMetadata,
     },
     modelCalls,
     parseErrors: 0,

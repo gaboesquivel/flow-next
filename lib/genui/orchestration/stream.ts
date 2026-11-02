@@ -55,34 +55,6 @@ const parseLine = (line: string) => {
   return { event: parsed.event, ok: true as const };
 };
 
-export const parseNdjsonText = (
-  text: string,
-): { events: ComposeStreamEvent[]; ok: true } | { ok: false; reason: NdjsonFailureReason } => {
-  if (utf8ByteLength(text) > NDJSON_MAX_RESPONSE_BYTES)
-    return { ok: false, reason: "oversized_response" };
-  const events: ComposeStreamEvent[] = [];
-  const lines = text.split("\n");
-  const completeLines = lines.slice(0, -1);
-  const trailing = lines.at(-1) ?? "";
-  for (const line of completeLines) {
-    if (!line.trim()) continue;
-    const parsed = parseLine(line);
-    if (!parsed.ok) return parsed;
-    events.push(parsed.event);
-    if (events.length > NDJSON_MAX_EVENTS) return { ok: false, reason: "too_many_events" };
-  }
-  if (trailing.trim()) {
-    const parsed = parseLine(trailing);
-    if (!parsed.ok) {
-      return text.endsWith("\n") ? parsed : { ok: false, reason: "truncated_stream" };
-    }
-    events.push(parsed.event);
-  }
-  if (events.length > NDJSON_MAX_EVENTS) return { ok: false, reason: "too_many_events" };
-  if (!events.length) return { ok: false, reason: "empty_stream" };
-  return { events, ok: true };
-};
-
 export const consumeNdjsonResponse = async ({
   onEvent,
   response,
@@ -97,11 +69,8 @@ export const consumeNdjsonResponse = async ({
   let totalBytes = 0;
   let events = 0;
 
-  const emitLine = (line: string): NdjsonConsumeResult | null => {
+  const emitLine = (line: string): { ok: false; reason: NdjsonFailureReason } | null => {
     if (!line.trim()) return null;
-    if (utf8ByteLength(line) > NDJSON_MAX_LINE_BYTES) {
-      return { ok: false, reason: "oversized_line" };
-    }
     const parsed = parseLine(line);
     if (!parsed.ok) return parsed;
     events += 1;
@@ -143,12 +112,12 @@ export const consumeNdjsonResponse = async ({
     return { ok: false, reason: "truncated_stream" };
   }
 
-  if (pending.trim()) {
-    const parsed = parseLine(pending);
-    if (!parsed.ok) return { ok: false, reason: "truncated_stream" };
-    events += 1;
-    if (events > NDJSON_MAX_EVENTS) return { ok: false, reason: "too_many_events" };
-    onEvent(parsed.event);
+  const tailFailure = emitLine(pending);
+  if (tailFailure) {
+    // An unterminated last line that fails to parse means the stream was cut off.
+    return tailFailure.reason === "too_many_events"
+      ? tailFailure
+      : { ok: false, reason: "truncated_stream" };
   }
 
   if (events === 0) return { ok: false, reason: "empty_stream" };

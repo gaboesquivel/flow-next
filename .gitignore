@@ -22,8 +22,6 @@ mcp-app/dist
 .DS_Store
 *.pem
 .vercel
-test-results
-playwright-report
 
 # eve build output (pnpm build:agents)
 .output/

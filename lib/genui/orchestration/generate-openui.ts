@@ -27,34 +27,23 @@ const generationSchema = z.object({
   records: z.array(groundedRecordSchema).max(24),
 });
 
-export const synthesizeOpenUiComposition = async ({
-  query,
+/** Generates an envelope from the prompt; returns null unless it passes the compiler. */
+const generateValidatedEnvelope = async ({
+  maxOutputTokens,
+  prompt,
   requestId,
   signal,
 }: {
-  query: string;
+  maxOutputTokens: number;
+  prompt: string;
   requestId: string;
   signal?: AbortSignal;
 }): Promise<CompositionEnvelope | null> => {
-  if (!gatewayAvailable()) return null;
-
-  const model = genuiModelId();
-  const seedRecords = [...acmeCatalogRecords, ...supportDashboardRecords];
-
   const result = await generateObject({
     abortSignal: signal,
-    maxOutputTokens: 1200,
-    model,
-    prompt: `You generate declarative OpenUI compositions for a demo app. Use ONLY these root components: ${componentNames.join(", ")}.
-Rules:
-- openuiText must be a single expression: root = ComponentName(...)
-- Use realistic synthetic data in records; ids must match references in openuiText.
-- No scripts, URLs to arbitrary domains, or credentials.
-- Guidance: ${compositionGuidance}
-
-User request: ${query}
-
-Example records (you may copy ids or invent similar synthetic rows): ${JSON.stringify(seedRecords.slice(0, 6))}`,
+    maxOutputTokens,
+    model: genuiModelId(),
+    prompt,
     schema: generationSchema,
   });
 
@@ -69,6 +58,36 @@ Example records (you may copy ids or invent similar synthetic rows): ${JSON.stri
   const validated = validateCompositionEnvelope({ envelope });
   if (!validated.ok) return null;
   return envelope;
+};
+
+export const synthesizeOpenUiComposition = async ({
+  query,
+  requestId,
+  signal,
+}: {
+  query: string;
+  requestId: string;
+  signal?: AbortSignal;
+}): Promise<CompositionEnvelope | null> => {
+  if (!gatewayAvailable()) return null;
+
+  const seedRecords = [...acmeCatalogRecords, ...supportDashboardRecords];
+
+  return await generateValidatedEnvelope({
+    maxOutputTokens: 1200,
+    prompt: `You generate declarative OpenUI compositions for a demo app. Use ONLY these root components: ${componentNames.join(", ")}.
+Rules:
+- openuiText must be a single expression: root = ComponentName(...)
+- Use realistic synthetic data in records; ids must match references in openuiText.
+- No scripts, URLs to arbitrary domains, or credentials.
+- Guidance: ${compositionGuidance}
+
+User request: ${query}
+
+Example records (you may copy ids or invent similar synthetic rows): ${JSON.stringify(seedRecords.slice(0, 6))}`,
+    requestId,
+    signal,
+  });
 };
 
 const turnTranscript = (turns?: ComposeTurn[]) => {
@@ -94,13 +113,10 @@ export const refineOpenUiComposition = async ({
 }): Promise<CompositionEnvelope | null> => {
   if (!gatewayAvailable()) return null;
 
-  const model = genuiModelId();
   const transcript = turnTranscript(turns);
 
-  const result = await generateObject({
-    abortSignal: signal,
+  return await generateValidatedEnvelope({
     maxOutputTokens: 1400,
-    model,
     prompt: `You refine an existing declarative OpenUI composition for a demo app. Use ONLY these root components: ${componentNames.join(", ")}.
 Rules:
 - openuiText must be a single expression: root = ComponentName(...)
@@ -119,18 +135,7 @@ Conversation:
 ${transcript || "(none)"}
 
 Refinement request: ${query}`,
-    schema: generationSchema,
-  });
-
-  const envelope: CompositionEnvelope = {
-    fallbackText: result.object.fallbackText,
-    libraryVersion: GENUI_LIBRARY_VERSION,
-    openuiText: result.object.openuiText,
-    records: result.object.records as GroundedRecord[],
     requestId,
-  };
-
-  const validated = validateCompositionEnvelope({ envelope });
-  if (!validated.ok) return null;
-  return envelope;
+    signal,
+  });
 };

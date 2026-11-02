@@ -6,13 +6,7 @@ import type { CompileResult } from "../core/errors";
 import { GENUI_MAX_DOCUMENT_BYTES, GENUI_MAX_STATEMENT_COUNT } from "../core/limits";
 import { supportedComponentSet } from "./catalog";
 import { flowGenuiContractLibrary, flowGenuiLibraryJsonSchema } from "./library";
-import {
-  validateComponentPropsPolicy,
-  validateCompositeForComponent,
-  validatePublicRecords,
-  validateRecordReferences,
-  validateSectionStackChildren,
-} from "./validation";
+import { validateComponentSubtree, validatePublicRecords } from "./validation";
 
 const parser = createParser(
   flowGenuiLibraryJsonSchema(),
@@ -21,9 +15,9 @@ const parser = createParser(
 
 const rootAssignmentPattern = /^\s*root\s*=\s*/u;
 
+/** Callers check `rootAssignmentPattern` first. */
 const trailingContentAfterRoot = (document: string) => {
   const trimmed = document.trim();
-  if (!rootAssignmentPattern.test(trimmed)) return true;
   const lines = trimmed.split("\n");
   if (lines.length > 1) {
     const afterFirst = lines.slice(1).join("\n").trim();
@@ -49,70 +43,30 @@ const mapParserError = (code: string): CompileResult | null => {
   return null;
 };
 
-const compositeFromProps = (component: string, props: Record<string, unknown>) => {
-  if (component === "Answer" || component === "SectionStack" || component === "StatusMessage") {
-    return null;
-  }
-  const { composite } = props;
-  return typeof composite === "string" ? composite : null;
-};
-
 const validateParsedRoot = ({
+  byId,
   component,
   props,
-  records,
 }: {
+  byId: ReadonlyMap<string, GroundedRecord>;
   component: string;
   props: Record<string, unknown>;
-  records: GroundedRecord[];
 }): CompileResult => {
   if (!supportedComponentSet.has(component)) {
     return { code: "unsupported_component", ok: false };
   }
 
-  const policy = validateComponentPropsPolicy({ name: component, props });
-  if (!policy.ok) {
-    return { code: policy.code, ok: false };
-  }
-
-  const composite = compositeFromProps(policy.name, props);
-  const compositeCheck = validateCompositeForComponent({
-    component: policy.name,
-    composite,
-  });
-  if (!compositeCheck.ok) {
-    return { code: compositeCheck.code, ok: false };
-  }
-
-  if (policy.name === "SectionStack") {
-    const stack = validateSectionStackChildren({ props, records });
-    if (!stack.ok) {
-      return { code: stack.code, ok: false };
-    }
-    return {
-      component,
-      composite,
-      ok: true,
-      props,
-      referencedRecordIds: stack.referencedRecordIds,
-    };
-  }
-
-  const refs = validateRecordReferences({
-    component: policy.name,
-    props,
-    records,
-  });
-  if (!refs.ok) {
-    return { code: refs.code, ok: false };
+  const subtree = validateComponentSubtree({ byId, component, props });
+  if (!subtree.ok) {
+    return { code: subtree.code, ok: false };
   }
 
   return {
     component,
-    composite,
+    composite: subtree.composite,
     ok: true,
     props,
-    referencedRecordIds: refs.referencedRecordIds,
+    referencedRecordIds: subtree.referencedRecordIds,
   };
 };
 
@@ -176,26 +130,20 @@ export const compileExperience = ({
     return { code: parsedResult.code, ok: false };
   }
   const { parsed } = parsedResult;
+  const [firstError] = parsed.meta.errors;
+  const mapped = firstError ? mapParserError(firstError.code ?? "") : null;
+  if (mapped) return mapped;
   if (!parsed.root) {
-    const [firstError] = parsed.meta.errors;
-    if (firstError) {
-      const mapped = mapParserError(firstError.code ?? "");
-      if (mapped) return mapped;
-    }
     return { code: "malformed_grammar", ok: false };
   }
-
-  if (parsed.meta.errors.length > 0) {
-    const [first] = parsed.meta.errors;
-    const mapped = mapParserError(first?.code ?? "");
-    if (mapped) return mapped;
-    return { code: "parse", detail: first?.message, ok: false };
+  if (firstError) {
+    return { code: "parse", detail: firstError.message, ok: false };
   }
 
   return validateParsedRoot({
+    byId: recordCatalog.byId,
     component: parsed.root.typeName,
     props: parsed.root.props,
-    records,
   });
 };
 

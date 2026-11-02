@@ -4,6 +4,7 @@ import { test } from "vitest";
 import { GET as getApiCatchAll } from "../app/api/[...path]/route";
 import { GET as getChat } from "../app/api/chat/route";
 import { GET as getOpenApi } from "../app/openapi.json/route";
+import { starterMcpToolCatalog } from "../lib/mcp/tool-catalog";
 import { buildOpenApiDocument } from "../lib/openapi/build-openapi-document";
 
 test("openapi.json route returns OpenAPI 3.1 with MCP and tool paths", async () => {
@@ -30,6 +31,19 @@ test("buildOpenApiDocument catalogs compose_ui with x-mcp-tool", () => {
   };
   assert.equal(compose["x-mcp-tool"], "compose_ui");
   assert.match(compose.description ?? "", /OpenUI/u);
+});
+
+test("buildOpenApiDocument x-mcp-tool schemas match the MCP tool catalog", () => {
+  const schemas = buildOpenApiDocument("https://example.com").components.schemas as Record<
+    string,
+    { "x-mcp-tool"?: string }
+  >;
+  const documented = Object.values(schemas)
+    .map((schema) => schema["x-mcp-tool"])
+    .filter(Boolean)
+    .toSorted();
+  const catalog = starterMcpToolCatalog.map((tool) => tool.name).toSorted();
+  assert.deepEqual(documented, catalog);
 });
 
 test("GET /api/chat returns JSON error", async () => {
