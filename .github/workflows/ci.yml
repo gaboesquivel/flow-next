@@ -2,6 +2,10 @@ name: CI
 
 on:
   workflow_dispatch:
+  # Runs on main seed the caches PR runs restore: PR caches are scoped to their own ref,
+  # so without a main run every new PR starts cold.
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -9,29 +13,87 @@ on:
 concurrency:
   # Draft runs skip in their own group so a late one never cancels the ready run.
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.pull_request.draft }}
-  cancel-in-progress: true
+  # Superseded PR pushes cancel; main runs finish so every merge seeds the cache.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
+env:
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+  NEXT_TELEMETRY_DISABLED: "1"
+
 jobs:
-  verify:
+  # Security check, lint, types, and tests: each takes seconds, so one job beats paying
+  # setup four times. Evals run on demand only (`pnpm eval`), never in CI.
+  checks:
     # Drafts run nothing; ready_for_review and later pushes run it (spec 048).
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
-          cache: pnpm
-
+      # Corepack activates the pnpm pinned in `packageManager`. No pnpm store cache: the
+      # 220 MB store restores and saves slower than a fresh install downloads.
+      - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm security:check
       - run: pnpm qa
-      # Evals run on demand only (`pnpm eval`), never in CI.
-      # test already built the MCP App bundle; build only the Next.js app.
-      - run: pnpm exec next build --webpack
+
+  # The production build is the slowest step, so it runs beside the checks, with the
+  # webpack cache (.next/cache) restored from the last run on this PR or on main.
+  build:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # Root and docs/ markdown cannot change the build; `checks` still lints it.
+      - name: Detect docs-only change
+        id: changes
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename' \
+            | node tooling/ci/docs-only.mjs | tee -a "$GITHUB_OUTPUT"
+      - if: steps.changes.outputs.docs_only != 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+      - if: steps.changes.outputs.docs_only != 'true'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+      - if: steps.changes.outputs.docs_only != 'true'
+        run: corepack enable
+      - if: steps.changes.outputs.docs_only != 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.changes.outputs.docs_only != 'true'
+        run: pnpm build
+
+  # The required check (`verify` in the main ruleset). It passes only when every job above
+  # passed, so splitting the work never lets a failed build merge.
+  verify:
+    if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    needs: [checks, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: All CI jobs passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "results: $RESULTS"
+          for result in $RESULTS; do
+            [ "$result" = success ] || exit 1
+          done
