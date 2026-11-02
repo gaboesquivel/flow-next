@@ -19,6 +19,13 @@ export default defineConfig({
       "mcp-app/**",
     ],
     include: ["**/*.test.ts"],
+    // Files share workers instead of a fresh module graph each, which cuts collect time.
+    // Env and global stubs reset after every test so no file leaks state into the next.
+    isolate: false,
+    // GitHub-hosted runners have 4 vCPUs; the default leaves one idle.
+    maxWorkers: process.env.CI ? 4 : undefined,
     pool: "forks",
+    unstubEnvs: true,
+    unstubGlobals: true,
   },
 });
