@@ -20,7 +20,7 @@ The user asked for a retrospective on how the agent environment could improve fu
 - **Navigation:** difficulty finding files or hidden dependencies; whether a short pointer document would help.
 - **Automated checks:** lint, typecheck, tests, or CI the repo already defines but does not run; missing guardrails when mistakes were preventable.
 - **Coding standards:** recurring violations that deserve a mechanical check versus judgment-only guidance in a standards document.
-- **Instruction files:** oversized always-loaded project or user instruction files; rules that belong in checks, skills, or linked docs instead. _Only suggest edits; do not modify `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, or similar files unless the user explicitly authorizes those edits._
+- **Instruction files and installed skills:** oversized always-loaded instruction files or skill listings; rules that belong in checks, skills, or linked docs instead; installed skills that differ from the project's committed source. Back each finding with a measurement labelled as an estimate, not an impression: [context.mjs](context.mjs) reports one (`node <this skill's folder>/context.mjs --repo <path>`), as does the host's own context view. _Only suggest edits; do not modify `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, or similar files unless the user explicitly authorizes those edits._
 - **Tool economy:** costly or redundant tool use; optional integrations that lack a simpler fallback.
 - **No-ops:** instructions that do not change behavior.
 - **Information access:** logs or readonly access that would have changed the outcome.

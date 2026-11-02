@@ -17,7 +17,7 @@ disable-model-invocation: false
 Outside a Git repository, offer `git init` and stop on a no. With no remote, commit and say nothing was published.
 
 - Commit this work's uncommitted changes first, with a Conventional Commits message: no credentials, local logs, or generated secrets. Leave unrelated changes uncommitted and report them.
-- Push the current branch, or the named one; the default branch only when it is current or named. No pull request, review, or CI wait; for those, the user says "build it" or "ship it".
+- Push the current branch, or the named one; the default branch only when it is current or named. No pull request, review, or CI wait; for those, the user says "build it" or "ship it". When the change is high or human tier (`build`'s Size guard), say so in the report and suggest "build it".
 - When the push is rejected because the remote moved, fetch, merge the remote branch, and push once; on a conflict, stop and report the local-only commits.
 
 Never force-push or rewrite remote branches. Never push other people's work. Never bypass protection; when it refuses the push, stop and say so.
