@@ -10,6 +10,11 @@ const groundedRecordPrefix = /^(?:entity:|document:|metric:|media:)/u;
 export const rootExperienceFromOpenUi = (openuiText: string) =>
   openuiText.match(/^\s*root\s*=\s*(?<root>\w+)/u)?.groups?.root ?? null;
 
+const envelopeFromResult = (result: ComposeResult) => {
+  const complete = result.events.find((event) => event.type === "complete");
+  return complete?.type === "complete" ? complete.envelope : null;
+};
+
 const gradeError = ({ error, matrixCase }: { error: unknown; matrixCase: QueryMatrixCase }) => {
   const message = error instanceof Error ? error.message : String(error);
   if (matrixCase.category === "malformed" && message === "invalid-query") {
@@ -123,8 +128,7 @@ export const gradeQueryMatrixCase = ({
     };
   }
 
-  const complete = result.events.find((event) => event.type === "complete");
-  const envelope = complete?.type === "complete" ? complete.envelope : null;
+  const envelope = envelopeFromResult(result);
 
   const categoryGrade = gradeCategorySurface({
     category: matrixCase.category,
@@ -202,9 +206,4 @@ const gradeExpectations = ({
   }
 
   return { grade: "PASS" as const };
-};
-
-export const envelopeFromResult = (result: ComposeResult) => {
-  const complete = result.events.find((event) => event.type === "complete");
-  return complete?.type === "complete" ? complete.envelope : null;
 };

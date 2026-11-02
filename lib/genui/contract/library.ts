@@ -1,139 +1,37 @@
 import { createLibrary, defineComponent } from "@openuidev/lang-core";
 
-import {
-  answerPropsSchema,
-  collectionGridPropsSchema,
-  comparisonViewPropsSchema,
-  dataExplorerPropsSchema,
-  detailViewPropsSchema,
-  documentationBlockPropsSchema,
-  filePreviewPropsSchema,
-  interactiveFormPropsSchema,
-  searchResultsPropsSchema,
-  sectionStackPropsSchema,
-  statusMessagePropsSchema,
-  timelineViewPropsSchema,
-  evidenceQuotePropsSchema,
-  rankedSignalListPropsSchema,
-} from "./schemas";
+import type { ComponentName } from "../registry/components";
+import { componentPropsByName } from "./schemas";
 
 const noop = () => null;
 
-const Answer = defineComponent({
-  component: noop,
-  description: "Short prose answer with source references.",
-  name: "Answer",
-  props: answerPropsSchema,
-});
-
-const SectionStack = defineComponent({
-  component: noop,
-  description: "Ordered sections for multi-intent results.",
-  name: "SectionStack",
-  props: sectionStackPropsSchema,
-});
-
-const CollectionGrid = defineComponent({
-  component: noop,
-  description: "Collection or grid of entities.",
-  name: "CollectionGrid",
-  props: collectionGridPropsSchema,
-});
-
-const SearchResults = defineComponent({
-  component: noop,
-  description: "Search results with optional filters.",
-  name: "SearchResults",
-  props: searchResultsPropsSchema,
-});
-
-const ComparisonView = defineComponent({
-  component: noop,
-  description: "Side-by-side or tabular comparison.",
-  name: "ComparisonView",
-  props: comparisonViewPropsSchema,
-});
-
-const TimelineView = defineComponent({
-  component: noop,
-  description: "Chronological timeline.",
-  name: "TimelineView",
-  props: timelineViewPropsSchema,
-});
-
-const DetailView = defineComponent({
-  component: noop,
-  description: "Detail view for one entity or document.",
-  name: "DetailView",
-  props: detailViewPropsSchema,
-});
-
-const DataExplorer = defineComponent({
-  component: noop,
-  description: "Metrics and charts exploration.",
-  name: "DataExplorer",
-  props: dataExplorerPropsSchema,
-});
-
-const DocumentationBlock = defineComponent({
-  component: noop,
-  description: "Documentation with code.",
-  name: "DocumentationBlock",
-  props: documentationBlockPropsSchema,
-});
-
-const InteractiveForm = defineComponent({
-  component: noop,
-  description: "Form wired to registered actions.",
-  name: "InteractiveForm",
-  props: interactiveFormPropsSchema,
-});
-
-const FilePreview = defineComponent({
-  component: noop,
-  description: "Embedded file or media preview.",
-  name: "FilePreview",
-  props: filePreviewPropsSchema,
-});
-
-const StatusMessage = defineComponent({
-  component: noop,
-  description: "Loading, empty, warning, or error.",
-  name: "StatusMessage",
-  props: statusMessagePropsSchema,
-});
-
-const EvidenceQuote = defineComponent({
-  component: noop,
-  description: "Customer evidence quote with link to source signal.",
-  name: "EvidenceQuote",
-  props: evidenceQuotePropsSchema,
-});
-
-const RankedSignalList = defineComponent({
-  component: noop,
-  description: "Ordered list of signals with supporter context.",
-  name: "RankedSignalList",
-  props: rankedSignalListPropsSchema,
-});
+/** Library order and descriptions; props come from `componentPropsByName`. */
+const componentDescriptions: [ComponentName, string][] = [
+  ["Answer", "Short prose answer with source references."],
+  ["SectionStack", "Ordered sections for multi-intent results."],
+  ["CollectionGrid", "Collection or grid of entities."],
+  ["SearchResults", "Search results with optional filters."],
+  ["ComparisonView", "Side-by-side or tabular comparison."],
+  ["TimelineView", "Chronological timeline."],
+  ["DetailView", "Detail view for one entity or document."],
+  ["DataExplorer", "Metrics and charts exploration."],
+  ["DocumentationBlock", "Documentation with code."],
+  ["InteractiveForm", "Form wired to registered actions."],
+  ["FilePreview", "Embedded file or media preview."],
+  ["StatusMessage", "Loading, empty, warning, or error."],
+  ["EvidenceQuote", "Customer evidence quote with link to source signal."],
+  ["RankedSignalList", "Ordered list of signals with supporter context."],
+];
 
 export const flowGenuiContractLibrary = createLibrary({
-  components: [
-    Answer,
-    SectionStack,
-    CollectionGrid,
-    SearchResults,
-    ComparisonView,
-    TimelineView,
-    DetailView,
-    DataExplorer,
-    DocumentationBlock,
-    InteractiveForm,
-    FilePreview,
-    StatusMessage,
-    EvidenceQuote,
-    RankedSignalList,
-  ],
+  components: componentDescriptions.map(([name, description]) =>
+    defineComponent({
+      component: noop,
+      description,
+      name,
+      props: componentPropsByName[name],
+    }),
+  ),
   root: "Answer",
 });
 

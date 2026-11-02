@@ -39,12 +39,6 @@ export interface RegisteredAction {
   policy: ActionSecurityPolicy;
 }
 
-export type ActionExecutor = (input: {
-  action: RegisteredAction;
-  invocation: ActionInvocation;
-  principal: ActionPrincipal;
-}) => Promise<{ ok: true } | { code: string; ok: false }>;
-
 const policyReady = (policy: ActionSecurityPolicy | undefined) =>
   typeof policy?.requiresAuth === "boolean" && typeof policy.requiresApproval === "boolean";
 

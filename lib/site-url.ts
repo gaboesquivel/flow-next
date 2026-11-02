@@ -1,15 +1,20 @@
 type HeaderLike = Pick<Headers, "get">;
 
-const requestFromHeaderList = (headerList: HeaderLike) => {
-  const host = headerList.get("host") ?? headerList.get("x-forwarded-host");
-  const normalizedHost = host?.split(",")[0]?.trim();
-  if (!normalizedHost) return;
-  const proto = headerList.get("x-forwarded-proto") ?? "https";
-  return new Request(`${proto}://${normalizedHost}/`);
+/** `proto://host` from Host (or X-Forwarded-Host) and X-Forwarded-Proto; first value only. */
+const originFromHostHeaders = (headers: HeaderLike) => {
+  const host = (headers.get("host") ?? headers.get("x-forwarded-host"))?.split(",")[0]?.trim();
+  if (!host) return;
+  const proto = headers.get("x-forwarded-proto") ?? "https";
+  return `${proto}://${host}`;
 };
 
-export const resolveSiteOriginFromHeaderList = (headerList: HeaderLike) =>
-  resolveSiteOrigin(requestFromHeaderList(headerList));
+const httpsOriginFromHost = (value: string) =>
+  `https://${value.replace(/^https?:\/\//u, "").replace(/\/$/u, "")}`;
+
+export const resolveSiteOriginFromHeaderList = (headerList: HeaderLike) => {
+  const origin = originFromHostHeaders(headerList);
+  return resolveSiteOrigin(origin ? new Request(`${origin}/`) : undefined);
+};
 
 export const resolveSiteOrigin = (request?: Request) => {
   const fromEnv = process.env.NEXT_PUBLIC_APP_ORIGIN?.trim();
@@ -23,30 +28,18 @@ export const resolveSiteOrigin = (request?: Request) => {
       // fall through to headers / env
     }
 
-    const host = request.headers.get("host") ?? request.headers.get("x-forwarded-host");
-    if (host) {
-      const normalizedHost = host.split(",")[0]?.trim();
-      if (normalizedHost) {
-        const proto = request.headers.get("x-forwarded-proto") ?? "https";
-        return `${proto}://${normalizedHost}`;
-      }
-    }
+    const fromHeaders = originFromHostHeaders(request.headers);
+    if (fromHeaders) return fromHeaders;
   }
 
   const vercelProduction = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  if (vercelProduction) {
-    const host = vercelProduction.replace(/^https?:\/\//u, "").replace(/\/$/u, "");
-    return `https://${host}`;
-  }
+  if (vercelProduction) return httpsOriginFromHost(vercelProduction);
 
   const vercel = process.env.VERCEL_URL?.trim();
   if (vercel) return `https://${vercel.replace(/\/$/u, "")}`;
 
   const agentic = process.env.AGENTIC_CHECK_URL?.trim();
-  if (agentic) {
-    const host = agentic.replace(/^https?:\/\//u, "").replace(/\/$/u, "");
-    return `https://${host}`;
-  }
+  if (agentic) return httpsOriginFromHost(agentic);
 
   return "http://localhost:3000";
 };

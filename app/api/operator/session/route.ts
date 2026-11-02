@@ -2,6 +2,7 @@ import {
   OPERATOR_SESSION_COOKIE,
   getOperatorAccessToken,
   isOperatorAccessConfigured,
+  matchesOperatorToken,
   operatorAccessDeniedResponse,
   signOperatorSession,
   verifyOperatorRequest,
@@ -32,10 +33,9 @@ export const POST = async (request: Request) => {
     );
   }
 
-  const configured = getOperatorAccessToken();
-  if (token !== configured) return operatorAccessDeniedResponse({ reason: "unauthorized" });
+  if (!matchesOperatorToken(token)) return operatorAccessDeniedResponse({ reason: "unauthorized" });
 
-  const session = signOperatorSession({ token: configured });
+  const session = signOperatorSession({ token: getOperatorAccessToken() });
   return Response.json(
     { ok: true },
     {

@@ -1,5 +1,9 @@
+import { z } from "zod";
+
+export const compositionTierSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+
 /** Level 1: controlled deterministic selection. Level 2: declarative multi-section compose. Level 3: open-ended primitive assembly (model). */
-export type CompositionTier = 1 | 2 | 3;
+export type CompositionTier = z.infer<typeof compositionTierSchema>;
 
 export const JEV_CONFIDENCE_THRESHOLD = 0.7;
 

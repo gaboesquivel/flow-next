@@ -1,4 +1,5 @@
 import type { GroundedRecord } from "../core/envelope";
+import type { CompileErrorCode } from "../core/errors";
 import type { ComponentName } from "../registry/components";
 import { componentCompositeAllowlist } from "./catalog";
 import { checkComponentDocument } from "./policy";
@@ -11,13 +12,11 @@ const recordKindForComponent = ({
   component: ComponentName;
   props: Record<string, unknown>;
 }): { ids: string[]; kind: GroundedRecord["kind"] | "any" } => {
-  if (component === "CollectionGrid" || component === "SearchResults") {
-    return {
-      ids: Array.isArray(props.entityIds) ? props.entityIds.map(String) : [],
-      kind: "entity",
-    };
-  }
-  if (component === "ComparisonView") {
+  if (
+    component === "CollectionGrid" ||
+    component === "SearchResults" ||
+    component === "ComparisonView"
+  ) {
     return {
       ids: Array.isArray(props.entityIds) ? props.entityIds.map(String) : [],
       kind: "entity",
@@ -72,9 +71,6 @@ export const validateCompositeForComponent = ({
   composite: string | null;
   component: ComponentName;
 }) => {
-  if (component === "SectionStack" || component === "Answer" || component === "StatusMessage") {
-    return { ok: true as const };
-  }
   const allowlist = componentCompositeAllowlist[component];
   if (!allowlist) return { ok: true as const };
   if (!composite) {
@@ -86,25 +82,24 @@ export const validateCompositeForComponent = ({
   return { ok: true as const };
 };
 
-export const validateRecordReferences = ({
+type RecordsById = ReadonlyMap<string, GroundedRecord>;
+
+const validateRecordReferences = ({
+  byId,
   component,
   props,
-  records,
 }: {
+  byId: RecordsById;
   component: ComponentName;
   props: Record<string, unknown>;
-  records: GroundedRecord[];
 }) => {
-  const catalog = validatePublicRecords({ records });
-  if (!catalog.ok) return catalog;
-
   const { ids, kind } = recordKindForComponent({ component, props });
   const unique = [...new Set(ids.filter(Boolean))];
   if (component === "ComparisonView" && unique.length < 2) {
     return { code: "invalid_recipe_cardinality" as const, ok: false as const };
   }
   for (const id of unique) {
-    const record = catalog.byId.get(id);
+    const record = byId.get(id);
     if (!record) {
       return { code: "missing_record" as const, id, ok: false as const };
     }
@@ -127,52 +122,54 @@ export const validateComponentPropsPolicy = ({
   return { name: policy.name as ComponentName, ok: true as const };
 };
 
-const compositeFromProps = (component: ComponentName, props: Record<string, unknown>) => {
-  if (component === "Answer" || component === "SectionStack" || component === "StatusMessage") {
-    return null;
-  }
+const compositeFromProps = (props: Record<string, unknown>) => {
   const { composite } = props;
   return typeof composite === "string" ? composite : null;
 };
 
+type SubtreeResult =
+  | { code: CompileErrorCode; ok: false }
+  | { composite: string | null; ok: true; referencedRecordIds: string[] };
+
+/** Validates one component (a root or a SectionStack child): policy, composite, then record references. */
 export const validateComponentSubtree = ({
+  byId,
   component,
   props,
-  records,
 }: {
-  component: ComponentName;
+  byId: RecordsById;
+  component: string;
   props: Record<string, unknown>;
-  records: GroundedRecord[];
-}) => {
+}): SubtreeResult => {
   const policy = validateComponentPropsPolicy({ name: component, props });
   if (!policy.ok) return policy;
 
-  const composite = compositeFromProps(policy.name, props);
+  const composite = compositeFromProps(props);
   const compositeCheck = validateCompositeForComponent({
     component: policy.name,
     composite,
   });
   if (!compositeCheck.ok) return compositeCheck;
 
-  const refs = validateRecordReferences({
-    component: policy.name,
-    props,
-    records,
-  });
+  const refs =
+    policy.name === "SectionStack"
+      ? validateSectionStackChildren({ byId, props })
+      : validateRecordReferences({ byId, component: policy.name, props });
   if (!refs.ok) return refs;
 
   return {
-    ok: true as const,
+    composite,
+    ok: true,
     referencedRecordIds: refs.referencedRecordIds,
   };
 };
 
-export const validateSectionStackChildren = ({
+const validateSectionStackChildren = ({
+  byId,
   props,
-  records,
 }: {
+  byId: RecordsById;
   props: Record<string, unknown>;
-  records: GroundedRecord[];
 }) => {
   const parsed = parseStackChildren(props.children);
   if (!parsed.ok) {
@@ -181,9 +178,9 @@ export const validateSectionStackChildren = ({
   const referenced = new Set<string>();
   for (const child of parsed.children) {
     const subtree = validateComponentSubtree({
+      byId,
       component: child.typeName,
       props: child.props,
-      records,
     });
     if (!subtree.ok) return subtree;
     for (const id of subtree.referencedRecordIds) referenced.add(id);

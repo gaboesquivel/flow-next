@@ -15,27 +15,37 @@ export type ControlledIntent =
 
 export interface RoutedIntent {
   intent: ControlledIntent | null;
-  injection: boolean;
-  normalizedQuery: string;
   tier: CompositionTier;
 }
 
 const injectionPattern =
   /ignore (?<scope>all|prior) instructions|system prompt|execute arbitrary|<script|javascript:/iu;
 
-export const routeQuery = (query: string): RoutedIntent => {
-  const normalizedQuery = query.trim().toLowerCase();
-  const injection = injectionPattern.test(query);
+/** `normalizedQuery` is trimmed and lowercased. */
+export const isPlanComparison = (normalizedQuery: string) =>
+  /compare|versus|vs\b/u.test(normalizedQuery) && /plan|orbit|nova/u.test(normalizedQuery);
 
-  if (injection) {
-    return {
-      injection: true,
-      intent: "injection-guard",
-      normalizedQuery,
-      tier: 1,
-    };
+/** Checked in order; the first match wins. */
+const controlledIntentRules: [test: (normalizedQuery: string) => boolean, ControlledIntent][] = [
+  [isPlanComparison, "compare-plans"],
+  [
+    (q) => /support\s+dashboard|help\s*desk|customer\s*service|\bticket\b|csat/u.test(q),
+    "support-dashboard",
+  ],
+  [(q) => /metric|mrr|churn|revenue|dashboard|chart/u.test(q), "show-metrics"],
+  [(q) => /timeline|release|history|chronolog/u.test(q), "product-timeline"],
+  [(q) => /search|find\b/u.test(q), "search-products"],
+  [(q) => /onboarding\s+form|sign[- ]?up\s+form|new\s+user\s+form/u.test(q), "onboarding-form"],
+  [(q) => /list|show all|catalog/u.test(q), "list-products"],
+  [(q) => /unsupported|render a 3d|arbitrary code|run shell/u.test(q), "insufficient-data"],
+];
+
+export const routeQuery = (query: string): RoutedIntent => {
+  if (injectionPattern.test(query)) {
+    return { intent: "injection-guard", tier: 1 };
   }
 
+  const normalizedQuery = query.trim().toLowerCase();
   if (normalizedQuery.includes(" and ") || normalizedQuery.includes(" plus ")) {
     const decision = tierFromSignals({
       ambiguous: false,
@@ -43,92 +53,14 @@ export const routeQuery = (query: string): RoutedIntent => {
       needsOpenComposition: false,
       synthesisRequired: true,
     });
-    return {
-      injection: false,
-      intent: null,
-      normalizedQuery,
-      tier: decision.tier,
-    };
+    return { intent: null, tier: decision.tier };
   }
 
-  if (/compare|versus|vs\b/u.test(normalizedQuery) && /plan|orbit|nova/u.test(normalizedQuery)) {
-    return {
-      injection: false,
-      intent: "compare-plans",
-      normalizedQuery,
-      tier: 1,
-    };
+  for (const [test, intent] of controlledIntentRules) {
+    if (test(normalizedQuery)) return { intent, tier: 1 };
   }
 
-  if (/support\s+dashboard|help\s*desk|customer\s*service|\bticket\b|csat/u.test(normalizedQuery)) {
-    return {
-      injection: false,
-      intent: "support-dashboard",
-      normalizedQuery,
-      tier: 1,
-    };
-  }
-
-  if (/metric|mrr|churn|revenue|dashboard|chart/u.test(normalizedQuery)) {
-    return {
-      injection: false,
-      intent: "show-metrics",
-      normalizedQuery,
-      tier: 1,
-    };
-  }
-
-  if (/timeline|release|history|chronolog/u.test(normalizedQuery)) {
-    return {
-      injection: false,
-      intent: "product-timeline",
-      normalizedQuery,
-      tier: 1,
-    };
-  }
-
-  if (/search|find\b/u.test(normalizedQuery)) {
-    return {
-      injection: false,
-      intent: "search-products",
-      normalizedQuery,
-      tier: 1,
-    };
-  }
-
-  if (/onboarding\s+form|sign[- ]?up\s+form|new\s+user\s+form/u.test(normalizedQuery)) {
-    return {
-      injection: false,
-      intent: "onboarding-form",
-      normalizedQuery,
-      tier: 1,
-    };
-  }
-
-  if (/list|show all|catalog/u.test(normalizedQuery)) {
-    return {
-      injection: false,
-      intent: "list-products",
-      normalizedQuery,
-      tier: 1,
-    };
-  }
-
-  if (/unsupported|render a 3d|arbitrary code|run shell/u.test(normalizedQuery)) {
-    return {
-      injection: false,
-      intent: "insufficient-data",
-      normalizedQuery,
-      tier: 1,
-    };
-  }
-
-  return {
-    injection: false,
-    intent: null,
-    normalizedQuery,
-    tier: ambiguousQueryTier(normalizedQuery).tier,
-  };
+  return { intent: null, tier: ambiguousQueryTier(normalizedQuery).tier };
 };
 
 export const ambiguousQueryTier = (normalizedQuery: string) =>

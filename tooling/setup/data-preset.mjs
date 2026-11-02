@@ -133,10 +133,10 @@ const findOrCreateDatabase = async ({ fetchImpl, token, orgId, projectName }) =>
 const provisionNeon = async ({ env, fetchImpl, local, projectName, rootDirectory }) => {
   const needDatabase = !local.databaseUrl;
   const needLink = !local.vercelProjectId;
-  if ((needDatabase && !env.NEON_API_KEY) || (needLink && !env.VERCEL_TOKEN))
+  if ((needDatabase && !env.NEON_API_KEY) || !env.VERCEL_TOKEN)
     return {
       error:
-        "neon preset needs Neon and Vercel authorization before it creates a project or database",
+        "neon preset needs Neon and Vercel authorization before it provisions or writes environment",
       ok: false,
     };
 
@@ -150,11 +150,6 @@ const provisionNeon = async ({ env, fetchImpl, local, projectName, rootDirectory
       })
     : { created: false, ok: true, orgId: local.vercelOrgId, projectId: local.vercelProjectId };
   if (!link.ok) return link;
-  if (!env.VERCEL_TOKEN)
-    return {
-      error: "neon preset needs Vercel authorization before it writes environment",
-      ok: false,
-    };
 
   const database = needDatabase
     ? await findOrCreateDatabase({

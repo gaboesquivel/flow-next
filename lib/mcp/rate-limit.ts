@@ -3,6 +3,9 @@ import { buildRateLimitHeaders, mcpRateLimitPolicy } from "@/lib/api/rate-limit-
 
 const windowMs = mcpRateLimitPolicy.windowSeconds * 1000;
 const maxPerWindow = mcpRateLimitPolicy.limit;
+/** Sweep expired buckets once the map grows past this many clients, at most once per window. */
+const maxBuckets = 10_000;
+let nextSweepAt = 0;
 
 const buckets = new Map<string, { count: number; resetAt: number }>();
 
@@ -11,39 +14,37 @@ const clientKey = (request: Request) =>
   request.headers.get("x-real-ip") ??
   "local";
 
+const sweepExpiredBuckets = (now: number) => {
+  if (buckets.size < maxBuckets || now < nextSweepAt) return;
+  nextSweepAt = now + windowMs;
+  for (const [key, bucket] of buckets) if (now >= bucket.resetAt) buckets.delete(key);
+};
+
 export const consumeMcpRateLimit = (request: Request) => {
   const key = clientKey(request);
   const now = Date.now();
-  const current = buckets.get(key);
-  if (!current || now >= current.resetAt) {
-    const resetAt = now + windowMs;
-    buckets.set(key, { count: 1, resetAt });
-    return {
-      headers: buildRateLimitHeaders({
-        remaining: maxPerWindow - 1,
-        resetAt,
-      }),
-      limited: null,
-    };
+  let bucket = buckets.get(key);
+  if (!bucket || now >= bucket.resetAt) {
+    sweepExpiredBuckets(now);
+    bucket = { count: 0, resetAt: now + windowMs };
+    buckets.set(key, bucket);
   }
-  current.count += 1;
-  const remaining = maxPerWindow - current.count;
+  bucket.count += 1;
   const headers = buildRateLimitHeaders({
-    remaining,
-    resetAt: current.resetAt,
+    remaining: maxPerWindow - bucket.count,
+    resetAt: bucket.resetAt,
   });
-  if (current.count > maxPerWindow) {
-    const retryAfter = Math.max(1, Math.ceil((current.resetAt - now) / 1000));
-    return {
-      headers,
-      limited: jsonError({
-        code: "rate_limited",
-        message: "Too many MCP requests from this client.",
-        resolution: "Wait one minute and retry.",
-        retryAfterSeconds: retryAfter,
-        status: 429,
-      }),
-    };
-  }
-  return { headers, limited: null };
+  if (bucket.count <= maxPerWindow) return { headers, limited: null };
+
+  return {
+    headers,
+    limited: jsonError({
+      code: "rate_limited",
+      extraHeaders: headers,
+      message: "Too many MCP requests from this client.",
+      resolution: "Wait one minute and retry.",
+      retryAfterSeconds: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)),
+      status: 429,
+    }),
+  };
 };

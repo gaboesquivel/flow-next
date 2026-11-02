@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/scroll-area";
 import { Textarea } from "@/components/textarea";
 import Link from "next/link";
 import { parseAsString, useQueryState } from "nuqs";
-import { useCallback, useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 
 const starters = [
   "Generate a customer support dashboard",
@@ -34,10 +34,9 @@ export const StudioClient = () => {
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const generationRef = useRef(0);
-  const latestRequestIdRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const resetComposition = useCallback(async () => {
+  const resetComposition = async () => {
     abortRef.current?.abort();
     setEnvelope(null);
     setMessages([]);
@@ -45,87 +44,77 @@ export const StudioClient = () => {
     setLandingDraft(null);
     setRefineInput("");
     await setQueryParam(null);
-  }, [setQueryParam]);
+  };
 
-  const runCompose = useCallback(
-    async (text: string, mode: "create" | "refine" = "create") => {
-      const query = text.trim();
-      if (!query) return;
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      generationRef.current += 1;
-      const clientRequestId = `studio-${generationRef.current}`;
-      latestRequestIdRef.current = clientRequestId;
-      const priorEnvelope = mode === "refine" ? envelope : null;
-      const priorMessages = mode === "refine" ? messages : [];
-      setError(null);
-      setLoading(true);
-      setMessages((prev) => [...prev, { content: query, role: "user" }]);
+  /** `query` arrives trimmed and non-empty from `submit`. */
+  const runCompose = async (query: string, mode: "create" | "refine") => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    generationRef.current += 1;
+    const generation = generationRef.current;
+    const clientRequestId = `studio-${generation}`;
+    const priorEnvelope = mode === "refine" ? envelope : null;
+    const priorMessages = mode === "refine" ? messages : [];
+    setError(null);
+    setLoading(true);
+    setMessages((prev) => [...prev, { content: query, role: "user" }]);
 
-      const streamState = {
-        latest: null as CompositionEnvelope | null,
-        message: null as string | null,
-        outcome: "success" as "failed" | "success",
-      };
+    const streamState = {
+      latest: null as CompositionEnvelope | null,
+      message: null as string | null,
+      outcome: "success" as "failed" | "success",
+    };
 
-      try {
-        const response = await fetch("/api/genui/compose", {
-          body: JSON.stringify({
-            clientRequestId,
-            mode,
-            priorEnvelope: priorEnvelope ?? undefined,
-            query,
-            turns: [...priorMessages, { content: query, role: "user" as const }].map((message) => ({
-              content: message.content,
-              role: message.role,
-            })),
-            version: 1,
-          }),
-          headers: { "Content-Type": "application/json" },
-          method: "POST",
-          signal: controller.signal,
-        });
+    try {
+      const response = await fetch("/api/genui/compose", {
+        body: JSON.stringify({
+          clientRequestId,
+          mode,
+          priorEnvelope: priorEnvelope ?? undefined,
+          query,
+          turns: [...priorMessages, { content: query, role: "user" }],
+          version: 1,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        signal: controller.signal,
+      });
 
-        const result = await consumeNdjsonResponse({
-          onEvent: (event) => {
-            if (event.requestId !== clientRequestId) return;
-            if (event.type === "error") streamState.message = event.message;
-            if (event.type === "partial") streamState.latest = event.envelope;
-            if (event.type === "complete") {
-              streamState.latest = event.envelope;
-              if (event.metadata?.outcome === "failed") streamState.outcome = "failed";
-            }
-          },
-          response,
-        });
-
-        if (latestRequestIdRef.current !== clientRequestId) return;
-
-        if (!result.ok && result.reason !== "aborted") setError(`Stream error: ${result.reason}`);
-        else if (streamState.message) setError(streamState.message);
-        else if (streamState.latest) {
-          const composed = streamState.latest;
-          if (streamState.outcome === "failed") {
-            setError(composed.fallbackText);
-            setEnvelope(composed);
-          } else {
-            setEnvelope(composed);
-            setMessages((prev) => [...prev, { content: composed.fallbackText, role: "assistant" }]);
+      const result = await consumeNdjsonResponse({
+        onEvent: (event) => {
+          if (event.requestId !== clientRequestId) return;
+          if (event.type === "error") streamState.message = event.message;
+          if (event.type === "partial") streamState.latest = event.envelope;
+          if (event.type === "complete") {
+            streamState.latest = event.envelope;
+            if (event.metadata?.outcome === "failed") streamState.outcome = "failed";
           }
-        } else setError("No composition returned.");
-        setLoading(false);
-      } catch (error_) {
-        if (latestRequestIdRef.current !== clientRequestId) return;
-        const aborted =
-          controller.signal.aborted ||
-          (error_ instanceof DOMException && error_.name === "AbortError");
-        if (!aborted) setError("Could not reach compose service.");
-        setLoading(false);
-      }
-    },
-    [envelope, messages],
-  );
+        },
+        response,
+      });
+
+      if (generationRef.current !== generation) return;
+
+      if (!result.ok && result.reason !== "aborted") setError(`Stream error: ${result.reason}`);
+      else if (streamState.message) setError(streamState.message);
+      else if (streamState.latest) {
+        const composed = streamState.latest;
+        setEnvelope(composed);
+        if (streamState.outcome === "failed") setError(composed.fallbackText);
+        else
+          setMessages((prev) => [...prev, { content: composed.fallbackText, role: "assistant" }]);
+      } else setError("No composition returned.");
+      setLoading(false);
+    } catch (error_) {
+      if (generationRef.current !== generation) return;
+      const aborted =
+        controller.signal.aborted ||
+        (error_ instanceof DOMException && error_.name === "AbortError");
+      if (!aborted) setError("Could not reach compose service.");
+      setLoading(false);
+    }
+  };
 
   const submit = async (text: string, mode: "create" | "refine" = "create") => {
     const query = text.trim();
@@ -270,3 +259,10 @@ export const StudioClient = () => {
     </main>
   );
 };
+
+/** StudioClient reads the `q` search param, so it renders inside its own Suspense boundary. */
+export const Studio = () => (
+  <Suspense fallback={<p className="text-muted-foreground p-8 text-sm">Loading…</p>}>
+    <StudioClient />
+  </Suspense>
+);

@@ -10,10 +10,4 @@ const handleMcp = (request: Request) =>
 export const POST = handleMcp;
 export const GET = handleMcp;
 export const DELETE = handleMcp;
-export const OPTIONS = () =>
-  new Response(null, {
-    headers: {
-      Allow: "GET, POST, DELETE, OPTIONS",
-    },
-    status: 204,
-  });
+export { handleMcpOptions as OPTIONS } from "@/lib/mcp/handle-mcp-request";

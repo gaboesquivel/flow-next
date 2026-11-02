@@ -1,6 +1,4 @@
-import { Suspense } from "react";
-
-import { StudioClient } from "@/app/_components/studio/studio-client";
+import { Studio } from "@/app/_components/studio/studio-client";
 
 export const dynamic = "force-dynamic";
 
@@ -11,9 +9,7 @@ export default function OperatorPage() {
         <p className="text-muted-foreground text-xs uppercase tracking-wide">Operator</p>
         <h1 className="font-semibold text-sm">Protected GenUI console</h1>
       </header>
-      <Suspense fallback={<p className="text-muted-foreground p-8 text-sm">Loading…</p>}>
-        <StudioClient />
-      </Suspense>
+      <Studio />
     </div>
   );
 }
