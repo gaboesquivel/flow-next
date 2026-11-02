@@ -19,8 +19,8 @@ pnpm skills:install   # restore skills from the lock (pnpm setup runs it when .a
 
 ## Skills
 
-**Flow (workflow):** every skill in [gaboesquivel/flow-skills](https://github.com/gaboesquivel/flow-skills/blob/main/docs/skills.md). Flow owns discovery, specs, delivery, debugging, domain language, and prototyping, so the bundle carries no other workflow skills.
+**Flow (workflow):** every skill in [gaboesquivel/flow-skills](https://github.com/gaboesquivel/flow-skills/blob/main/docs/skills.md). Flow owns discovery, specs, delivery, debugging, testing policy (`build` Tests), domain language, and prototyping, so the bundle carries no other workflow skills.
 
 **Runtime and UI:** `ai-sdk`, `eve`, `typesafe-ai`, `nextjs`, `next-dev-loop`, `shadcn`, `building-components`, `nuqs`, `portless`, `vercel-cli`, `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`
 
-**MCP and testing:** `mcp-builder`, `agent-browser`, `vitest`, `playwright`. Testing policy is Flow's: contracts are tested first and UI is checked in the preview (`build` Tests), so the bundle carries no TDD skill.
+**MCP and testing:** `mcp-builder`, `agent-browser`, `vitest`, `playwright`
