@@ -81,6 +81,8 @@ Without Gateway credentials and without the explicit direct-Anthropic override, 
 
 Repositories are **independent** deployments; no runtime dependency between them.
 
+Eve agent layout and observability: [agents.md](./agents.md).
+
 ## Demo behavior
 
 - GenUI compose uses synthetic fixtures (no database).
