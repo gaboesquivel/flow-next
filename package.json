@@ -81,7 +81,7 @@
     "ultracite": "8.0.2",
     "vite": "^6.4.5",
     "vite-plugin-singlefile": "^2.3.4",
-    "vitest": "3.2.4"
+    "vitest": "4.1.11"
   },
   "engines": {
     "node": ">=24"
