@@ -29,6 +29,9 @@ export const PHRASES = [
 // The always-loaded form of `write-agents` Tools, so the rule holds outside skills too.
 export const TOOL_RULE = 'Do the work yourself: CLI, then MCP, then API, then browser. Hand the user only sign-in, secrets, payment, consent, or permission changes, once, as one command each (`write-agents` Tools).'
 
+// The always-loaded form of the delivery gates (`build` Size guard and Verify, `review` Effort, `ship` Gate).
+export const REVIEW_RULE = 'Before merge, a second agent reviews the diff in a fresh context, with effort matched to risk; every finding is fixed or answered. CI, Git hook, auth, billing, and release changes ship only on the user\'s yes.'
+
 const eolOf = (text) => (text.includes('\r\n') ? '\r\n' : '\n')
 
 export function normalizeDelivery(value) {
@@ -69,9 +72,11 @@ export function buildFlowBlock({ delivery, eol = '\n' } = {}) {
     '',
     '## Flow',
     '',
-    'This project uses Flow skills. Say a phrase to load its skill; the installed `flow` skill describes this block. Delete the block to opt out.',
+    'This project uses Flow skills: say a phrase below to load its skill. The installed `flow` skill owns this block; delete it to opt out.',
     '',
     TOOL_RULE,
+    '',
+    REVIEW_RULE,
     '',
     ...(mode ? [`Delivery: ${mode}`, ''] : []),
     ...alignTable([['Say', 'Skill'], ...PHRASES.map(([say, skill]) => [say, `\`${skill}\``])]),
