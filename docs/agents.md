@@ -4,25 +4,25 @@ Flow defines **how** teams build (skills under `.agents/skills/`). [Vercel Eve](
 
 ## Layout
 
-| Path | Role |
-| --- | --- |
-| `agents/assistant/` | Public Eve app: GenUI tools and demo data |
-| `agents/operator/` | Protected Eve app: same tools plus operator diagnostics |
-| `lib/agent-tools/` | Shared typed tool implementations (`defineTool`) |
-| `lib/agent-instrumentation/` | Shared OpenTelemetry policy for both Eve apps |
-| `next.config.ts` | `withEve(config, { eveRoot: "." })` mounts Eve into Next.js |
-| `.agents/skills/` | Flow methodology and stack skills for IDE hosts (not copied into Eve) |
+| Path                         | Role                                                                  |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `agents/assistant/`          | Public Eve app: GenUI tools and demo data                             |
+| `agents/operator/`           | Protected Eve app: same tools plus operator diagnostics               |
+| `lib/agent-tools/`           | Shared typed tool implementations (`defineTool`)                      |
+| `lib/agent-instrumentation/` | Shared OpenTelemetry policy for both Eve apps                         |
+| `next.config.ts`             | `withEve(config, { eveRoot: "." })` mounts Eve into Next.js           |
+| `.agents/skills/`            | Flow methodology and stack skills for IDE hosts (not copied into Eve) |
 
 Each Eve app follows Eve conventions: `agent/agent.ts`, `agent/instructions.md`, `agent/tools/*.ts`, optional `agent/instrumentation/`.
 
 ## What runs where
 
-| Surface | Runtime | Purpose |
-| --- | --- | --- |
-| `/api/mcp`, `/mcp` | MCP SDK + shared compose helpers | Streamable HTTP tools and MCP Apps preview for interop |
-| `/api/chat` | Vercel AI SDK `streamText` | Lightweight sidebar chat without a full agent loop |
-| `/api/operator/chat`, `/api/mcp/operator` | AI SDK chat + MCP with auth | Operator diagnostics (see [INTEROP.md](./INTEROP.md)) |
-| Eve sessions (CLI / future channels) | Eve workflow | Durable turns, tool approval, subagents, schedules |
+| Surface                                   | Runtime                          | Purpose                                                |
+| ----------------------------------------- | -------------------------------- | ------------------------------------------------------ |
+| `/api/mcp`, `/mcp`                        | MCP SDK + shared compose helpers | Streamable HTTP tools and MCP Apps preview for interop |
+| `/api/chat`                               | Vercel AI SDK `streamText`       | Lightweight sidebar chat without a full agent loop     |
+| `/api/operator/chat`, `/api/mcp/operator` | AI SDK chat + MCP with auth      | Operator diagnostics (see [INTEROP.md](./INTEROP.md))  |
+| Eve sessions (CLI / future channels)      | Eve workflow                     | Durable turns, tool approval, subagents, schedules     |
 
 Do not add a second agent framework. Extend Eve for agentic behavior; use the AI SDK only where streaming or structured output is enough.
 
@@ -58,10 +58,10 @@ Never commit `.env.local`, API keys, or operator secrets. See `.env.example` for
 
 ## Commands
 
-| Command | What it checks |
-| --- | --- |
+| Command     | What it checks                                                    |
+| ----------- | ----------------------------------------------------------------- |
 | `pnpm eval` | Offline GenUI matrix + Eve tool smoke (`evals/eve-smoke.test.ts`) |
-| `pnpm qa` | Lint, types, unit tests (no live models) |
+| `pnpm qa`   | Lint, types, unit tests (no live models)                          |
 
 ## Further reading
 
