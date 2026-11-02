@@ -32,6 +32,8 @@ Then ask your agent to `/start` (or say "start a new project"): Flow's skills sh
 
 Cross-template contract: [docs/INTEROP.md](./docs/INTEROP.md).
 
+Eve runtime architecture: [docs/agents.md](./docs/agents.md).
+
 Agent skills for this stack: [docs/agent-skills.md](./docs/agent-skills.md).
 
 ## Deploy
