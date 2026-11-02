@@ -24,28 +24,11 @@ env:
   NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
-  # Security check, lint, types, and tests: each takes seconds, so one job beats paying
-  # setup four times. Evals run on demand only (`pnpm eval`), never in CI.
-  checks:
+  # One job, two lanes: the checks run in the background while the production build runs
+  # in the foreground. Separate jobs each repeat ~10 s of setup and need an aggregate job
+  # for the required `verify` check, which measured slower than sharing the 4 vCPUs.
+  verify:
     # Drafts run nothing; ready_for_review and later pushes run it (spec 048).
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version-file: .nvmrc
-      # Corepack activates the pnpm pinned in `packageManager`. No pnpm store cache: the
-      # 220 MB store restores and saves slower than a fresh install downloads.
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm security:check
-      - run: pnpm qa
-
-  # The production build is the slowest step, so it runs beside the checks, with the
-  # webpack cache (.next/cache) restored from the last run on this PR or on main.
-  build:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -54,7 +37,8 @@ jobs:
       pull-requests: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      # Root and docs/ markdown cannot change the build; `checks` still lints it.
+
+      # Root and docs/ markdown cannot change the build; the checks still lint it.
       - name: Detect docs-only change
         id: changes
         if: github.event_name == 'pull_request'
@@ -64,36 +48,40 @@ jobs:
         run: |
           gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename' \
             | node tooling/ci/docs-only.mjs | tee -a "$GITHUB_OUTPUT"
-      - if: steps.changes.outputs.docs_only != 'true'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
+      # Webpack cache from the last run on this PR, or on main for a new PR (~20 MB).
       - if: steps.changes.outputs.docs_only != 'true'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .next/cache
           key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
           restore-keys: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-      - if: steps.changes.outputs.docs_only != 'true'
-        run: corepack enable
-      - if: steps.changes.outputs.docs_only != 'true'
-        run: pnpm install --frozen-lockfile
-      - if: steps.changes.outputs.docs_only != 'true'
-        run: pnpm build
+      # Corepack activates the pnpm pinned in `packageManager`. No pnpm store cache: the
+      # 220 MB store restores and saves slower than a fresh install downloads.
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      # Tests and the Next.js build both read the MCP App bundle, so build it once first.
+      - run: pnpm build:mcp-app
 
-  # The required check (`verify` in the main ruleset). It passes only when every job above
-  # passed, so splitting the work never lets a failed build merge.
-  verify:
-    if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
-    needs: [checks, build]
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - name: All CI jobs passed
-        env:
-          RESULTS: ${{ join(needs.*.result, ' ') }}
+      # `pnpm qa` without its MCP App rebuild, which would race the build below.
+      # Evals run on demand only (`pnpm eval`), never in CI.
+      - name: Start checks in the background
+        id: checks
         run: |
-          echo "results: $RESULTS"
-          for result in $RESULTS; do
-            [ "$result" = success ] || exit 1
-          done
+          set +e
+          (pnpm security:check && pnpm lint && pnpm check-types && pnpm test:unit
+            echo $? > "$RUNNER_TEMP/checks.code") > "$RUNNER_TEMP/checks.log" 2>&1 &
+
+      - if: steps.changes.outputs.docs_only != 'true'
+        run: pnpm exec next build --webpack
+
+      # Reports the checks even when the build failed, so one run shows every failure.
+      - name: Checks
+        if: always() && steps.checks.outcome == 'success'
+        run: |
+          while [ ! -f "$RUNNER_TEMP/checks.code" ]; do sleep 1; done
+          cat "$RUNNER_TEMP/checks.log"
+          exit "$(cat "$RUNNER_TEMP/checks.code")"
