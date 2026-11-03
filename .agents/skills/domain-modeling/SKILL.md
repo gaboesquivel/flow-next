@@ -18,21 +18,10 @@ When a request uses a synonym or an ambiguous term that changes behavior, settle
 
 ## During the session
 
-### Challenge against the glossary
-
-When a term conflicts with `GLOSSARY.md`, say so. Example: "Your glossary defines cancellation as X, but you seem to mean Y. Which is it?"
-
-### Sharpen fuzzy language
-
-When language is vague or overloaded, propose a precise term. Example: "You said account: do you mean Customer or User?"
-
-### Discuss concrete scenarios
-
-Stress-test relationships with specific scenarios, including edge cases that force clear boundaries between concepts.
-
-### Cross-reference with code
-
-When the user states how something works, check the code. Surface contradictions: "The code cancels entire orders, but you described partial cancellation. Which is right?"
+- Name a term that conflicts with `GLOSSARY.md` ("Your glossary defines cancellation as X, but you seem to mean Y. Which is it?").
+- Propose a precise term for vague or overloaded language ("account: Customer or User?").
+- Stress-test relationships with concrete edge-case scenarios.
+- Check claims about behavior against the code and surface contradictions.
 
 ### Update GLOSSARY.md inline
 

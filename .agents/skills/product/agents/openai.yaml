@@ -1,0 +1,5 @@
+interface:
+  display_name: "Product"
+  short_description: "Check the product against its vision, metrics, and evidence"
+policy:
+  allow_implicit_invocation: true

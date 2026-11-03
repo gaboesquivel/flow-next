@@ -1,5 +1,5 @@
 interface:
   display_name: "Review"
-  short_description: "Five-axis review against intent, spec, and context"
+  short_description: "Fresh-context review on /code-review, with spec verdicts"
 policy:
   allow_implicit_invocation: true

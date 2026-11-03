@@ -1,5 +1,0 @@
-interface:
-  display_name: "Grill"
-  short_description: "Stress-test an idea with focused questions"
-policy:
-  allow_implicit_invocation: true

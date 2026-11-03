@@ -11,26 +11,8 @@ export const DELIVERY_MODES = ['github', 'local']
 // Legacy values read as github; the next block write records github.
 const LEGACY_GITHUB = ['pull-request', 'pull-requests', 'pullrequest', 'pr']
 
-// The one phrase table; docs link here and tests check each phrase against its skill's description.
-export const PHRASES = [
-  ['"explore this"', 'explore'],
-  ['"interview me"', 'interview'],
-  ['"grill this"', 'grill'],
-  ['"spec it"', 'to-spec'],
-  ['"share the draft"', 'to-spec'],
-  ['"break it down"', 'to-tasks'],
-  ['"build it"', 'build'],
-  ['"check it against the spec"', 'review'],
-  ['"ship it" (add "local" or "with GitHub" for one run)', 'ship'],
-  ['"push it"', 'push'],
-  ['"update the docs"', 'flow'],
-]
-
-// The always-loaded form of `write-agents` Tools, so the rule holds outside skills too.
-export const TOOL_RULE = 'Do the work yourself: CLI, then MCP, then API, then browser. Hand the user only sign-in, secrets, payment, consent, or permission changes, once, as one command each (`write-agents` Tools).'
-
-// The always-loaded form of the delivery gates (`build` Size guard and Verify, `review` Effort, `ship` Gate).
-export const REVIEW_RULE = 'Before merge, a second agent reviews the diff in a fresh context, with effort matched to risk; every finding is fixed or answered. CI, Git hook, auth, billing, and release changes ship only on the user\'s yes.'
+// Leading phrases the block names as a pointer; each skill's description owns its phrases, and a test checks each one is there.
+export const LEADING_PHRASES = ['explore this', 'spec it', 'build it', 'ship it']
 
 const eolOf = (text) => (text.includes('\r\n') ? '\r\n' : '\n')
 
@@ -72,15 +54,9 @@ export function buildFlowBlock({ delivery, eol = '\n' } = {}) {
     '',
     '## Flow',
     '',
-    'This project uses Flow skills: say a phrase below to load its skill. The installed `flow` skill owns this block; delete it to opt out.',
-    '',
-    TOOL_RULE,
-    '',
-    REVIEW_RULE,
+    `This project uses Flow skills, reached by plain language (${LEADING_PHRASES.map((p) => `"${p}"`).join(', ')}; each skill's description lists its phrases). The installed \`flow\` skill owns this block; delete it to opt out.`,
     '',
     ...(mode ? [`Delivery: ${mode}`, ''] : []),
-    ...alignTable([['Say', 'Skill'], ...PHRASES.map(([say, skill]) => [say, `\`${skill}\``])]),
-    '',
     END,
   ].join(eol)
 }
