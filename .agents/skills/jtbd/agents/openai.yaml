@@ -1,5 +1,0 @@
-interface:
-  display_name: "Jobs To Be Done"
-  short_description: "Jobs, struggles, and the progress people want"
-policy:
-  allow_implicit_invocation: true

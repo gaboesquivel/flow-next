@@ -8,7 +8,7 @@ const root = path.resolve(import.meta.dirname, "../..");
 const lock = JSON.parse(readFileSync(path.join(root, "skills-lock.json"), "utf-8")).skills;
 
 // Flow owns these workflow jobs (TDD included, via `build` Tests); a second skill for the same job makes agents pick arbitrarily.
-const flowOwned = ["debug", "domain-modeling", "explore", "prototype", "start"];
+const flowOwned = ["build", "design", "domain-modeling", "explore", "start"];
 const overlapping = ["diagnosing-bugs", "research", "tdd", "test-driven-development"];
 
 test("skills lock carries Flow and no overlapping workflow skills", () => {
