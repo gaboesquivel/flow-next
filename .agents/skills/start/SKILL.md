@@ -1,12 +1,12 @@
 ---
 name: start
-description: Start a new project from flow-next or flow-mono with verified setup, renamed identity, and an initial Git commit, while explore shapes the product. Use when the user says "start a Next.js project", "start a new project", or "start a monorepo".
+description: Start a new project from flow-next or flow-mono with verified setup, renamed identity, and an initial Git commit. Use when the user says "start a Next.js project", "start a new project", or "start a monorepo".
 disable-model-invocation: false
 ---
 
 # Start
 
-**New product.** Initialize a new application in a clone of [flow-next](https://github.com/gaboesquivel/flow-next) or [flow-mono](https://github.com/gaboesquivel/flow-mono) while `explore` shapes the product in the same sitting. Done when the first deployment is green.
+**Optional.** Initialize a new application in a clone of [flow-next](https://github.com/gaboesquivel/flow-next) or [flow-mono](https://github.com/gaboesquivel/flow-mono). Done when the initial commit exists. Discovery and delivery are separate work, and Flow needs neither this skill nor a starter.
 
 ## Ask only what is open
 
@@ -22,7 +22,7 @@ Anything other than an explicit yes is not one.
 
 Run `node <skill-dir>/lib/bootstrap.mjs <destination> <project-name> --preset <preset>` and keep its JSON. It is the one supported path: it removes template remotes, renames identity through an allowlist, runs `pnpm setup`, writes the root docs and the Flow block, runs the checks, and commits `chore: initialize <slug>` only when all pass. Exit 0 means committed with a clean tree; otherwise `blockers` names what stopped it. Never commit around a blocker or with `--no-verify`.
 
-Meanwhile hand the conversation to `explore` as a new-product run; it writes nothing until the initial commit. A failed bootstrap does not discard the exploration.
+When the request describes the product, run `explore` alongside as a new-product run; it writes nothing until the initial commit, and a failed bootstrap does not discard it. Otherwise offer it once at the end.
 
 | Check | Command / action |
 | --- | --- |
@@ -31,8 +31,10 @@ Meanwhile hand the conversation to `explore` as a new-product run; it writes not
 | identity_scan | `scanTreeForStaleIdentifiers` returns no issues |
 | gitignore_artifacts | `git check-ignore` for `.env.local`, `node_modules`, `.next` |
 
-## First green deploy
+## After the commit
 
-Push the initial commit to the authorized repository only, then run `node <skill-dir>/lib/github-governance.mjs <owner>/<repo>`; report its `unsupported` and `missingPermissions` and never weaken the preset. When the repository is connected to Vercel, wait for that commit's deployment and report the URL once green; when it is not, connect it with the host's CLI, else hand off the sign-in once. With no deployment configured, the commit is the done signal.
+Push the initial commit to the authorized repository only. The plugin's guard blocks a direct push to a GitHub default branch: never work around it; hand the user the one `git push` command and report the push as pending. Once it lands on GitHub, run `node <skill-dir>/lib/github-governance.mjs <owner>/<repo>`; report its `unsupported` and `missingPermissions` and never weaken the preset. With no GitHub repository, report governance as skipped.
 
-Edit instruction files only for the Flow block and the `@AGENTS.md` import. Report the template, destination, slug and host, each check, the initial commit SHA, the governance report, the deployment URL, and blockers. After the first deployment, offer "design this" once.
+A deployment is delivery: report one the host already shows, or say none is connected, and never wait for it. "Deploy it" connects a host.
+
+Edit instruction files only for the Flow block and the `@AGENTS.md` import. Report the template, destination, slug and host, each check, the initial commit SHA, the push, the governance report, the deployment state, and blockers. Offer "design this" once, and "explore this" unless it ran.

@@ -1,5 +1,5 @@
 interface:
   display_name: "Start"
-  short_description: "Bootstrap flow-next or flow-mono while exploring the product"
+  short_description: "Bootstrap a new project from flow-next or flow-mono"
 policy:
   allow_implicit_invocation: true

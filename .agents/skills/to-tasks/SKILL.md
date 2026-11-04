@@ -6,13 +6,13 @@ disable-model-invocation: false
 
 # To Tasks
 
-Break a plan, spec, or conversation into **tasks**: independently verifiable vertical slices, each naming the tasks that **block** it. Prefer the fewest: split only when slices can run in parallel, need separate review, or would not fit one session; never per layer, file, or step.
+Break a plan, spec, or conversation into **tasks**: independently verifiable vertical slices, each naming the tasks that **block** it. Outcomes, dependencies, and integration cost set the count, never a target: a first MVP may need several tasks, a small change one. Split where a slice can be demonstrated alone, needs separate review, or would not fit one session; never per layer, file, or step.
 
 ## Process
 
 1. **Context.** Read a named spec, issue, or URL in full, and the areas touched. Use the project's terms, respect decision records, and prefactor first: make the change easy, then make the easy change.
 2. **Slices.** Each delivers narrow, demoable behavior across the layers it needs and fits one fresh context.
-3. **Area.** Every package or directory a task changes (coarse, never file paths), including routes outside its main package; `build` slices by area, so disjoint areas must mean disjoint changes.
+3. **Area.** Every package or directory a task changes, never file paths, fine enough to show independence inside a shared app (`app/notes` when nothing else in `app` changes), including routes outside its main package; `build` keeps concurrent work apart by area, so disjoint areas must mean disjoint changes.
 4. **Blockers.** Only a real data or file dependency, never topic order; prefer a wide frontier. A task is **ready** once its blockers are complete.
 
 **Wide refactors** no vertical slice can land green use **expand–contract**: add the new form; migrate call sites in green batches by package, each blocked by the expand; remove the old form, blocked by every batch. Batches that cannot stay green alone share an integration branch and a final verify task.

@@ -14,7 +14,7 @@ It accepts any **Proposed** direction-change record the branch adds, and a draft
 
 ## Deliver
 
-Before the first write, refresh context (`write-agents` Context freshness) and read the SessionStart report; on overlap with another owner's paths, ask whether to contribute, wait, or proceed. Use `domain-modeling` Shared language and `DESIGN.md`, and update owning documentation when behavior changes. Commit only this work (no credentials, logs, or secrets) on a non-default branch, then [Verify](#verify). Report outcome, scope, verification, and next step first.
+Before the first write, refresh context (`write-agents` Context freshness) and read the SessionStart report; on overlap with another owner's paths, ask whether to contribute, wait, or proceed. Use `domain-modeling` Shared language and `DESIGN.md`, and update owning documentation when behavior changes. Commit only this work (no credentials, logs, or secrets) on a non-default branch, then [Verify](#verify). Report outcome, scope, verification, and next step first; for consequential work, add what a person should understand before it ships.
 
 ### Pull request
 
@@ -32,16 +32,16 @@ Otherwise stop and report the branch as not ready.
 
 ### Size guard
 
-Judge risk once, at intake, from the change, never its author. It sets `review`'s tier and never stops work; when unsure, pick higher.
+Judge risk once, at intake, from the change, never its author: what it could break and how hard that is to undo, never how new it is. It sets `review`'s tier and never stops work; when unsure, pick higher.
 
 - **Low:** docs, copy, or configuration with no behavior change, or additive behind a flag. **Quick** review.
-- **Standard:** other code changes. **Standard** review.
-- **High:** new product behavior, data shape or public API changes, migrations, authentication or permissions, secrets, dependencies or lockfiles, shell or exec paths, or "review it". **Deep** review.
+- **Standard:** other code, including ordinary feature work that stays inside existing trust boundaries and is easy to undo, such as additive routes or schema. **Standard** review.
+- **High:** a trust boundary (authentication, permissions, secrets, payments, shell or exec paths), a non-additive data change (a migration that rewrites, renames, narrows, constrains, or removes stored data), wide blast radius (an existing public API, dependencies or lockfiles), complexity or uncertainty where a wrong guess is costly, or "deep review". **Deep** review.
 - **Human:** CI or workflow files, Git hooks, authentication, billing or payments, and release or publishing configuration also need a person: list those paths in the pull request and report; `ship` lands them only on the user's yes after that report.
 
 ### Slices
 
-Before implementing, split the work into vertical slices by disjoint area so no two write the same files; never cut per layer. `Area:` lines give the slices; the host sizes fan-out. Shared interfaces land first. Name each slice and its area. The main thread writes shared files (indexes, lockfiles, the spec's status) and verifies.
+Work with several outcomes gets vertical slices, never cut per layer; `Area:` lines give them when present, and slices running at once write disjoint files. Parallelism is the host's call (native sessions, worktrees, subagents), only when the elapsed time saved beats briefing, integrating, and reviewing the result. Shared interfaces land first. Name each slice and its area. The main thread writes shared files (indexes, lockfiles, the spec's status) and verifies.
 
 ### Data changes
 
@@ -49,10 +49,10 @@ A stored-data shape change ships as a versioned migration with the code, never a
 
 ## Tests
 
-A testing policy in the project's `ARCHITECTURE.md` overrides this default.
+Agents judge what needs evidence; the project's scripts run the checks. A testing policy in the project's `ARCHITECTURE.md` overrides this default.
 
-- **Contracts are test-first.** For a new or changed API route, MCP tool, or the domain function behind them, write the focused check first and see it fail. Cover input, result, actionable errors, and permissions, one check per behavior; test adapters only for agreeing with it.
-- **Other behavior** gets a focused check that fails without the change; docs, configuration, copy, and prototypes get none.
+- **Consequential contracts are test-first.** For security, permissions (including a new route's or tool's own access rule), payments, non-additive migrations, MCP tools, and other contracts systems or agents depend on, write the focused check first and see it fail, covering the behaviors whose failure would matter.
+- **Other behavior needs evidence, not necessarily a test:** running it, an existing check, or a focused check where the logic is easy to get wrong or a regression would be costly. Record what you ran and its output in the pull request or report. Docs, configuration, copy, and prototypes get none.
 - **No UI tests by default.** Verify UI in the running app; add one only when asked or a regression returns.
 - **Focused, then full once:** focused checks while working; the full suite once, in Verify.
 
