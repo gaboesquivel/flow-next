@@ -29,7 +29,7 @@ Human-tier work (`build`'s Size guard) lands only on the user's yes given after 
 
 ## Push it
 
-"Push it" or "deploy it" commits this work (no secrets) and pushes the current or named branch with no pull request, review, or CI wait; the host deploys it. If the remote moved, fetch, merge, and push once. Suggest "build it" for high or human tier, then report liveness.
+"Push it" or "deploy it" commits this work (no secrets) and pushes the current or named branch with no pull request, review, or CI wait; the host deploys it. With no host connected, connect one with its CLI, else hand off the sign-in once. If the remote moved, fetch, merge, and push once. Suggest "build it" for high or human tier, then report liveness.
 
 ## Drop the spec
 

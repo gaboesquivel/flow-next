@@ -10,9 +10,13 @@ Turn the conversation into a proportionate spec, labelling assumptions instead o
 
 Use the project's spec location, else `docs/specs/NNN-short-name.md`, numbered by `node <skill-dir>/scripts/next-number.mjs` (fetch first). Commit on the work's branch (else a new `spec/<number>-<slug>`), never the default branch.
 
-**One bet.** A spec tests one assumption and ships as one unit; split only when a part proves something or ships safely alone, exceeds one appetite, or needs an earlier part's learning. A choice gets a decision record (`docs/decisions/NNNN-short-name.md`) only when it chose among real alternatives **and** reaches beyond this spec or is costly to reverse; otherwise it is a Decisions bullet. Records never hold scope or tasks. Write a needed record as **Proposed** and link it.
+**What, not how.** Name outcomes, constraints, and consequential decisions. Components, file layout, and implementation are `build`'s unless an established constraint fixes them.
 
-**Length.** About 1,000 words at most: link records, glossary, and code instead of restating them; split a bet that does not fit. A later bet gets a **candidate** stub: the problem and the assumption it tests.
+**How many specs.** Decide this yourself and report why, never asking. For a new product, name the first useful release in the Solution, proposing one as an assumption when the brief has none; the vision (`PRODUCT.md`) may stay broad. Default to one spec; several independent tasks in one spec is valid. Split only when a part can be delivered on its own, the whole is too much to accept and deliver at once, a dependency between parts is consequential, or later investment should wait on what an earlier part teaches. Never split for length or task count. Write the active spec in full and each later one as a **candidate** stub: the problem and what it waits on. Each spec states its acceptance boundary and Out of Scope; name a dependency only when real.
+
+A choice gets a decision record (`docs/decisions/NNNN-short-name.md`) only when it chose among real alternatives **and** reaches beyond this spec or is costly to reverse; otherwise it is a Decisions bullet. Records never hold scope or tasks. Write a needed record as **Proposed** and link it.
+
+**Length.** As short as complete, with no word limit: link records, glossary, and code instead of restating them.
 
 Open no issues unless asked; the pull request closes an issue the user named (`Closes #N`).
 
@@ -31,8 +35,8 @@ A draft without an acceptance scenario, or without **Exposure** when it adds dep
 
 ## Process
 
-1. Explore only what the conversation lacks (specs, decisions, tests, terms per `domain-modeling` Shared language), and sketch test seams, preferring existing high-level ones. Reversing or narrowing an Accepted decision, accepted spec, or `PRODUCT.md` fact needs an explicit yes (`explore`'s Direction changes) unless already confirmed.
-2. Commit the spec as `draft` and any record as **Proposed**, publishing nothing and asking nothing; report the files, open assumptions, and next step: "build it", "accept the spec", or "share the draft".
+1. Explore only what the conversation lacks (specs, decisions, tests, terms per `domain-modeling` Shared language), and sketch test seams for consequential behavior, preferring existing high-level ones. Reversing or narrowing an Accepted decision, accepted spec, or `PRODUCT.md` fact needs an explicit yes (`explore`'s Direction changes) unless already confirmed.
+2. Commit the spec as `draft` and any record as **Proposed**, publishing nothing and asking nothing; report the files, how many specs and why, open assumptions, and next step: "build it", "accept the spec", or "share the draft".
 
 <spec-template>
 
@@ -46,7 +50,7 @@ The change, from the user's side.
 
 ## Decisions
 
-Only choices that shape execution, contract-first: typed API, MCP tools when agents are users, and errors and permissions an agent can act on.
+Only consequential choices and established constraints that shape execution. For capabilities agents or other systems use, the contract, with errors and permissions they can act on.
 
 **Exposure** (required for deployable behaviour): where it runs, who can reach it, and how writes behave without authentication; with authentication out of scope, writes fail closed.
 
@@ -56,9 +60,9 @@ A confirmed direction change without a record: the file, old position, new one.
 
 ## Acceptance
 
-**Acceptance scenario** (required; `review` gives each step a verdict): the actor, the starting state with realistic data, and numbered steps with observable results; for agent users, also through the MCP tool. A metric the work should move gets a step proving it counts correctly.
+**Acceptance scenario** (required; `review` gives each step a verdict): the actor, the starting state with realistic data, and numbered steps with observable results; for agent users, also through the MCP tool. A metric the work should move gets a step proving it counts correctly; manual or existing measurement is enough when it answers the question.
 
-Then invariants, each with the focused check proving it (seam and command), per `build` Tests.
+Then consequential invariants, each with the evidence proving it, per `build` Tests.
 
 ## Out of Scope
 

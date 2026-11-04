@@ -21,6 +21,8 @@ Never replace a project's product identity with Flow's tagline, mission, princip
 2. Update only affected sections, one writer per root file. Keep `DESIGN.md` consistent with what shipped; choosing a new visual direction is `design`'s. Keep one home per fact; link instead of duplicating.
 3. Create a root file only when it would hold meaningful content. No empty trees, methodology boilerplate, or parallel trackers (no PRD/PDR/ADR folders).
 
+**Goals.** When `PRODUCT.md` is missing or has no brief (problem, who, riskiest assumption, main metric and kill criterion, core journeys), align what exists and name `explore` once as the next step.
+
 ## Flow block
 
 "Set up Flow here" opts the project into Flow mode; deleting the block opts out. The block needs Git: outside a repository, offer `git init` and stop on a no.
@@ -28,8 +30,6 @@ Never replace a project's product identity with Flow's tagline, mission, princip
 **Delivery.** The mode is inferred (`build`'s Delivery mode), so the block's `Delivery:` line is an optional override: write it only when the user names `local` or `github`, and keep a recorded one unless the user names another. Never ask for it.
 
 **Write** with [`lib/flow-block.mjs`](lib/flow-block.mjs): `node <skill-dir>/lib/flow-block.mjs <absolute-project-path> [local|github]`. The helper owns the layout: which file holds the block, the `@AGENTS.md` import, markers, the pointer, keeping the recorded value, and refusing malformed markers or symlinked, out-of-project, or shared instruction files. Never touch text outside the markers and that import line. Report its output and relay any warning.
-
-**Goals.** When `PRODUCT.md` is missing or has no brief (problem, who, riskiest assumption, main metric and kill criterion, core journeys), name `explore` as the next step and wait.
 
 ## Boundaries
 

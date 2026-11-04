@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review work in a fresh context against intent, the spec, and root context, on top of /code-review, and repair confirmed defects; "review only" stays read-only. Use when the user says "review it", "check it against the spec", or "does this match the intent".
+description: Review work in a fresh context against intent, the spec, and root context, on top of /code-review, and repair confirmed defects; "review only" stays read-only. Use when the user says "review it", "deep review", "check it against the spec", or "does this match the intent".
 disable-model-invocation: false
 ---
 
@@ -14,7 +14,7 @@ Claude Code's `/code-review` hunts bugs and `/security-review` checks trust boun
 
 ## Effort
 
-`build`'s Size guard picks the tier from the change, never its author; "review it" runs Deep. Tiers map to `/code-review` levels: Quick → `low`, Standard → `medium`, Deep → `high`.
+`build`'s Size guard picks the tier from the change, never its author, for a standalone "review it" too; "deep review" runs Deep. Tiers map to `/code-review` levels: Quick → `low`, Standard → `medium`, Deep → `high`.
 
 ## Inspect
 
@@ -29,7 +29,7 @@ Findings cite `file:line`: Important (blocks), Nit (at most three), or Pre-exist
 
 ## Repair
 
-Fix each Important finding and `unmet` step on the branch, covering its whole bug class, with a check that fails without the fix. Answer every other finding: fixed, or resolved with reason. "Review only" or "don't fix" stays read-only. Inside `build`, the main thread repairs. A re-review covers only the new diff and never repeats a finding. After three rounds with an Important finding open, stop patching and rethink the approach; fix a recurring finding at its source (a lint rule, skill, or `AGENTS.md`).
+Fix each Important finding and `unmet` step on the branch, covering its whole bug class, with a check that fails without the fix when the bug could return unnoticed. Answer every other finding: fixed, or resolved with reason. "Review only" or "don't fix" stays read-only. Inside `build`, the main thread repairs. A re-review covers only the new diff and never repeats a finding. After three rounds with an Important finding open, stop patching and rethink the approach; fix a recurring finding at its source (a lint rule, skill, or `AGENTS.md`).
 
 ## Report
 

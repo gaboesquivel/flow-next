@@ -12,7 +12,7 @@ disable-model-invocation: false
 
 A missing source is a finding, not a reason to stop or ask.
 
-- **Intent:** `PRODUCT.md` (problem, users, core journeys, main and supporting metrics, kill criterion, riskiest assumptions, non-goals), `DESIGN.md` for journey steps, accepted specs and decisions, and any roadmap or `candidate` stubs. A Proposed record or draft spec is planned, not intended fact.
+- **Intent:** `PRODUCT.md` (problem, users, core journeys, first useful release, main and supporting metrics, kill criterion, riskiest assumptions, non-goals), `DESIGN.md` for journey steps, accepted specs and decisions, and any roadmap or `candidate` stubs. A Proposed record or draft spec is planned, not intended fact.
 - **Reality:** code, routes, commands, and tests show what users can do; recent Git history shows where effort went. Never count a capability as implemented on a document's word alone.
 - **Evidence:** metric data through whatever the host reaches: tools, local data, or exports the user supplies. Nothing is required. Measure only what is defined, and say when a definition is missing.
 

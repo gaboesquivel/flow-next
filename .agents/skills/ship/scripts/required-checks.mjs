@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 export class ReadError extends Error {}
 
 const PAGE = 100
+const UNAVAILABLE_ON_PLAN = /Upgrade to GitHub Pro or make this repository public/u
 
 const read = (api, path) => {
   try { return api(path) } catch (e) { throw new ReadError(`cannot read ${path}: ${e.message}`) }
@@ -41,7 +42,14 @@ export function evaluate({ api, repo, number }) {
   const reasons = []
 
   // Required checks from active rulesets and classic protection; both endpoints need only read access.
-  const rules = read(api, `repos/${repo}/rules/branches/${branch}`)
+  // A private repository on a free plan cannot have rulesets: GitHub refuses that route with an upgrade message,
+  // so it has none to enforce. Any other refusal still fails closed.
+  let rules
+  try { rules = api(`repos/${repo}/rules/branches/${branch}`) } catch (e) {
+    if (!UNAVAILABLE_ON_PLAN.test(e.message)) throw new ReadError(`cannot read repos/${repo}/rules/branches/${branch}: ${e.message}`)
+    rules = []
+    reasons.push('rulesets are unavailable on this plan (private repository without GitHub Pro)')
+  }
   const fromRules = rules.filter((r) => r.type === 'required_status_checks').flatMap((r) => r.parameters.required_status_checks)
   const classic = read(api, `repos/${repo}/branches/${branch}`).protection?.required_status_checks ?? {}
   const fromClassic = [...(classic.checks ?? []), ...(classic.contexts ?? []).map((context) => ({ context }))]
